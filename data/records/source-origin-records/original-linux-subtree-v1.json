@@ -1,0 +1,17 @@
+{
+  "kind": "existing-linux-section-source-ownership",
+  "sourceRepository": "red-cup-engineering/computer-operating-system-services-section",
+  "sourceCommit": "df875d1dc2ca7c855245912386a3565bbab80309",
+  "sourcePath": "services/linux-services-section/services/systemd-services-section",
+  "originalTree": "baaf860cf5313c15196caf812d23feb17d6224aa",
+  "originalImportCommit": "22ccaa1e37e68053cd50e1363584cc8c8aa79611",
+  "canonicalRepository": "red-cup-engineering/systemd-services-section",
+  "originalPublicAudiencePreserved": true,
+  "originalLeafCount": 20,
+  "functionalCodeUnchanged": true,
+  "sourceComposition": [],
+  "scope": "Dedicated source ownership and ordinary Git composition; no invented package/version, registry release or native operating acceptance",
+  "remainingObligations": [
+    "Original embedded systemd-unit-inventory-observation-service 0.3.6 differs from its existing canonical repository 0.3.2; distinct source content must be integrated and received before replacing the embedded application."
+  ]
+}
