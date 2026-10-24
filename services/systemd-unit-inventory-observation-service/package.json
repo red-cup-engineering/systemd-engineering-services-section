@@ -63,7 +63,7 @@
     "node": ">=22"
   },
   "dependencies": {
-    "@red-cup-engineering/javascript-node-services-section": "0.3.2",
+    "@red-cup-engineering/javascript-node-engineering-services-section": "0.3.2",
     "@red-cup-engineering/computer-system-engine": "0.1.2"
   }
 }
