@@ -140,8 +140,11 @@ exit-main; the detached child waits for explicit release-child. Both are benign
 and idle. Their I/O and owned runtime socket keep their lives observable.
 
 The native controller uses Python3.12 os.pidfd_open and selectors/select for
-actual process exit and socket/client readiness. No sleeps, timers, timeout
-arguments or polling loops. A kernel pidfd is acquired while the controlled
+actual process exit and socket/client readiness. No sleeps, positive timeout
+arguments, deadlines or elapsed-clock polling loops. A single nonblocking
+poll(0) may read the current readiness of already retained native handles; it
+is a state observation, not a wait bound or retry rule. Original cgroup.events
+POLLPRI notifications drive population changes without scheduled rereads. A kernel pidfd is acquired while the controlled
 process is held alive at its handshake, before the controller allows it to
 exit. Client termination participates in the same readiness set so a failed
 start cannot strand a socket accept. Use the pinned actual Node programme,
@@ -153,7 +156,8 @@ ExitType=cgroup, Restart=no, KillMode=control-group, KillSignal=SIGKILL,
 RuntimeMaxSec=infinity, TimeoutStartSec=infinity, TimeoutStopSec=infinity,
 PrivateUsers=yes, ProtectSystem=strict, ProtectHome=read-only, ProtectControlGroups=yes,
 PrivateTmp=yes, PrivateNetwork=yes, InaccessiblePaths for this user's actual
-bus, and ReadWritePaths restricted to the owned runtime socket directory.
+bus and manager runtime directory (including its actual private manager socket),
+and ReadWritePaths restricted to the owned runtime socket directory.
 Use systemd-run --user --wait --pipe --collect --expand-environment=no with the
 actual existing slice. It does not install/enable a unit or change host limits.
 Refuse an absent/unqualified slice. The systemd-run child and both fixture PIDs
@@ -222,9 +226,104 @@ The host owns the complete request and receipt; receipt identity:
 
 `ni:///sha-256;11DqyXRFlz6VnSQyarlK1_qMo6GMzBXcAzvGsL61mdY`
 
-This receives only native launch/confinement compatibility for that benign
-command. C1/C2/C3, original cgroup cancellation, descendant quiescence, observer
-loss, reusable execution-die construction and Code consumer activation remain
-unreceived. Independently refused generated fixtures are not part of this
-source publication. A model delivery or this prerequisite must not satisfy
-those remaining controls.
+That receipt receives only native launch/confinement compatibility for its
+benign command. The separately received controlled C1/C2/C3 run below now
+receives descendant completion, original-group cancellation and observer-loss
+behavior. Reusable execution-die construction, persistent recovery and Code
+consumer activation still require their own receiving. A model delivery or the
+benign prerequisite alone must not satisfy those remaining controls.
+
+## Controlled receiving implementation contract
+
+A single owned Python NativeCase lifecycle supplies all three cases. It binds
+the listener before launch, obtains the observer pidfd immediately, receives
+NDJSON incrementally with Unix SO_PEERCRED, and matches actual process/group/
+boot identities before any release command. Systemd GetUnit and typed ExecStart
+D-Bus observations use busctl JSON, not a guessed executable substring parser.
+A verified original cgroup directory fd supplies relative no-follow kill/events
+descriptors; manager invocation identity is checked again after acquisition.
+The trusted fixture has exactly one detached child and no external effect lane.
+
+Native cleanup applies even when bootstrap/profile receiving fails. Adoption
+for cleanup requires the unique original description, admitted slice, exact
+typed executable/argv, invocation and cgroup path. A held original group handle
+authorizes its cancellation; an unknown/mismatched unit is retained as explicit
+uncertainty. Runtime artifacts are removed only after native group quiescence.
+Source and transcript evidence is written in finally, including original and
+secondary receiving/cleanup errors. Observer termination uses its own pidfd.
+No production execution die or Code capability is minted by these tests.
+
+Native observation has its own representation: KillSignal is received as the
+actual integer signal number, and Sec properties as their native USec property
+names. Host-view procfs membership must match the manager's original group.
+The fixture's reported cgroup view is checked for equality only when the actual
+subject/controller cgroup namespace identities agree; differing namespace
+views are retained explicitly. This never substitutes reported text for the
+host's independently observed original process/group membership.
+
+The controller distinguishes a zero population reading from deactivation of
+the original kernel core file. ENODEV alone is not a success flag: the retained
+directory device/inode must still match the received original group, and both
+original fixture pidfds must show exit. For the qualified Linux6.18 core file,
+cgroup_events_show does not return ENODEV; kernfs reports it when an active
+reference is unavailable after deactivation. cgroup_destroy_locked rejects a
+populated group or live child cgroups before core-file removal. Directory link
+count does not supply this contract. Other read/event failures remain receiving
+failures. The actual private manager socket was observed on
+this host, so the controlled profile masks its runtime directory as well as the
+user bus; ProtectControlGroups alone is not a denial of manager socket access.
+
+A caller-owned exclusive evidence journal records the exact prepared unit,
+controller PID, boot, argv and source before launch; it flushes and fsyncs that
+record before actuation. It then retains received native identity and case
+outcomes. This is evidence for the same controlled attempt, not another Work
+queue, automatic retry or persistent-provider claim. The final receipt and
+primary/secondary errors remain separate from that incremental custody record.
+
+The first native C1 run observed all required process transitions and native
+success, but final receiving refused an invented st_nlink==0 assumption. That
+attempt remains unaccepted. Its exact original unit is now not-found/inactive;
+no observation timeout or retry established that fact. Revised receiving uses
+the original kernel core-file lifecycle and actual fixture exits described
+above. Cleanup first observes native population, so it does not try to cancel an
+already quiescent/offline original group merely because an earlier receiver
+failed. A changed receiver requires a fresh independently received control run.
+
+Kernel source references for this receiving rule:
+
+- https://raw.githubusercontent.com/torvalds/linux/v6.18/kernel/cgroup/cgroup.c
+  (`cgroup_events_show`, `cgroup_destroy_locked`)
+- https://raw.githubusercontent.com/torvalds/linux/v6.18/fs/kernfs/file.c
+  (`kernfs_seq_start`, `kernfs_seq_show`)
+
+## Received controlled native behavior
+
+The revised controller and received fixture ran on actual Linux
+6.18.54.1-microsoft-standard-WSL2, systemd255, Python3.12.3 and the pinned
+Node24.18.0 programme. The original installed asynchronous Node-command
+transport supplied no deadline or output truncation. Its exact request and
+status-zero receipt matched the independently read evidence.
+
+- C1: actual main pidfd exited while the detached child, original populated
+  group and native waiter remained live; child release then produced native
+  success and group quiescence.
+- C2: the retained original cgroup.kill descriptor cancelled both actual
+  fixture processes; the native waiter reported non-success (255), and the
+  original group became quiescent.
+- C3: killing only the held observer pidfd produced status -9 while both
+  fixture processes and the populated original group stayed live. Explicit
+  original-group cleanup then established quiescence; observer completion
+  remained unreceived rather than becoming job success.
+
+All 207 recorded receiving checks were true. Each actual unit was subsequently
+not-found/inactive, its original group path absent and its owned runtime
+removed. Native evidence identity: `ni:///sha-256;k1j5xn0JyzltGFKX5YS36ZZrCqm4H4tBWCoGhLPR7D0`.
+Independent receiving identity: `ni:///sha-256;9hu-ngNaFSopuX0LLnPlQTp1qKpQFNSZ3LvtAf0g3AE`.
+The host owns the complete source approvals, literal command receipt,
+fsynced attempt journal, process/group observations and independent receiving.
+
+This accepts controlled source/native behavior only. It does not turn the
+section into a runtime, broaden the inventory die, create a new package, mint
+a Code capability, admit persistent recovery, activate a carrier or satisfy
+original installed-profile/CI/estate Work. The native execution die and its
+consumer contracts must be formed and received under their proper owners.
