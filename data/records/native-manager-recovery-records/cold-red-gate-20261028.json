@@ -107,7 +107,8 @@
     "Receive current CI package manifest, every selected archive hash/name/version/architecture, exact source descriptor and patch; verify finite ZIP entries, sizes and no links/traversal.",
     "Construct and register immutable whole package and predecessor products through original Guix local-file Code primitive; retain native GC roots before target use.",
     "Receive actual ELF architecture/interpreter/NEEDED symbols and --version/build features against this target closure; admit disk/inodes/memory afresh.",
-    "Receive every installed predecessor version, manager PID/birth/invocation/executable/maps, all system/user authority jobs and unchanged original startup-fence hashes immediately before install."
+    "Receive every installed predecessor version, manager PID/birth/invocation/executable/maps, all system/user authority jobs and unchanged original startup-fence hashes immediately before install.",
+    "Receive BOTH actual active user managers UID1000 andUID1001, each original account identity/invocation/executable and job/state boundary; product admission includes vendor global user-manager reexec rather than a user1001-only claim."
   ],
   "nativeEffect": {
     "provider": "original Ubuntu APT/dpkg systemd package owner",
@@ -118,9 +119,218 @@
       "serviceEffects": [
         "try-restart systemd-networkd.service",
         "try-restart systemd-journald.service",
+        "restart systemd-resolved.service under original maintainer-script upgrade branch",
+        "restart systemd-timesyncd.service/systemd-time-wait-sync.service under original maintainer-script upgrade branch",
+        "restart systemd-udevd.service under original maintainer-script upgrade branch",
+        "pam-auth-update --package",
         "systemd-tmpfiles/sysusers/catalog/binfmt/sysctl declared package maintenance"
       ],
-      "evidence": "Actual original /var/lib/dpkg/info/systemd.postinst received read-only; exact new product maintainer scripts must also be received before admission."
+      "evidence": "Actual original /var/lib/dpkg/info/systemd.postinst received read-only; exact new product maintainer scripts must also be received before admission.",
+      "activeUserManagersObserved": [
+        1000,
+        1001
+      ],
+      "nativeSourceEvidence": {
+        "maintainerScripts": [
+          {
+            "kind": "preinst",
+            "package": "libnss-systemd:amd64",
+            "path": "/var/lib/dpkg/info/libnss-systemd:amd64.preinst",
+            "serviceEffects": [],
+            "sha256": "e277a9bf2f3508659341dbd58176e44723d86f72c1f05464465b3e861aadff46"
+          },
+          {
+            "kind": "postinst",
+            "package": "libnss-systemd:amd64",
+            "path": "/var/lib/dpkg/info/libnss-systemd:amd64.postinst",
+            "serviceEffects": [],
+            "sha256": "d2f7a517cb8f1bed799797927da1f5e1ad8359ce3b1a15ab95a70b4d49b86947"
+          },
+          {
+            "kind": "postrm",
+            "package": "libnss-systemd:amd64",
+            "path": "/var/lib/dpkg/info/libnss-systemd:amd64.postrm",
+            "serviceEffects": [],
+            "sha256": "49ea810693166ccbf9abce6c2ef35f9e12eab3122e4ca49b9dffad7155b957ef"
+          },
+          {
+            "kind": "postinst",
+            "package": "libpam-systemd:amd64",
+            "path": "/var/lib/dpkg/info/libpam-systemd:amd64.postinst",
+            "serviceEffects": [
+              "pam-auth-update --package"
+            ],
+            "sha256": "943223c64afa4b0047dbcf4b9f869da7ce4a852afa41407d3110cb4c3a6fcc46"
+          },
+          {
+            "kind": "prerm",
+            "package": "libpam-systemd:amd64",
+            "path": "/var/lib/dpkg/info/libpam-systemd:amd64.prerm",
+            "serviceEffects": [
+              "# pam-auth-update --remove removes the named profile from the active config.",
+              "# This may need to change later as pam-auth-update evolves.",
+              "    pam-auth-update --package --remove systemd"
+            ],
+            "sha256": "58741037b8dc450936a776d68c982a59b45dc753974534f7b6c37bb5ad98e4dc"
+          },
+          {
+            "kind": "preinst",
+            "package": "systemd",
+            "path": "/var/lib/dpkg/info/systemd.preinst",
+            "serviceEffects": [
+              "  # The user may have used 'systemctl enable /usr/share/systemd/tmp.mount', which",
+              "  # Do not use systemctl here, as libsystemd-shared might not be unpacked yet"
+            ],
+            "sha256": "6c85d4d72e10071d26f103a65a1e00b6790e8c518aa3c7d03ed0368efaab9faa"
+          },
+          {
+            "kind": "postinst",
+            "package": "systemd",
+            "path": "/var/lib/dpkg/info/systemd.postinst",
+            "serviceEffects": [
+              "_systemctl() {",
+              "        systemctl \"$@\"",
+              "    if [ \"$(_systemctl show -P LoadState systemd-binfmt.service)\" != \"masked\" ]; then",
+              "        _systemctl restart systemd-binfmt.service || true",
+              "    if [ \"$(_systemctl show -P LoadState systemd-sysctl.service)\" != \"masked\" ]; then",
+              "        _systemctl restart systemd-sysctl.service || true",
+              "_restart_managers() {",
+              "    _systemctl daemon-reexec || true",
+              "    _systemctl kill --kill-whom='main' --signal='SIGRTMIN+25' 'user@*.service' || true",
+              "    # do not restart logind",
+              "    _systemctl try-restart systemd-networkd.service || true",
+              "    _systemctl try-restart systemd-journald.service || true",
+              "                _restart_managers",
+              "    systemctl ${DPKG_ROOT:+--root=\"$DPKG_ROOT\"} enable getty@tty1.service || true",
+              "    systemctl ${DPKG_ROOT:+--root=\"$DPKG_ROOT\"} enable remote-fs.target || true",
+              "    systemctl ${DPKG_ROOT:+--root=\"$DPKG_ROOT\"} enable systemd-pstore.service || true",
+              "# skip daemon-reexec and try-restarts during shutdown to avoid hitting LP: #1803391",
+              "if [ -n \"$2\" ] && [ \"$(systemctl is-system-running)\" != \"stopping\" ]; then",
+              "    _restart_managers"
+            ],
+            "sha256": "a7a0d6570c7b70e6854306df98204f51a7215cd605c5a04a97d49bdebea7bf0a"
+          },
+          {
+            "kind": "prerm",
+            "package": "systemd",
+            "path": "/var/lib/dpkg/info/systemd.prerm",
+            "serviceEffects": [],
+            "sha256": "37d0c513f5402dcbdff4c09def2c1b8c05d3c58cda9a4b83b6426e619e2614a7"
+          },
+          {
+            "kind": "postrm",
+            "package": "systemd",
+            "path": "/var/lib/dpkg/info/systemd.postrm",
+            "serviceEffects": [],
+            "sha256": "6163119dddbeddc1781e0d41d99cb3e41796a15bdfe2a0c03a90e89e1d5ee008"
+          },
+          {
+            "kind": "postinst",
+            "package": "systemd-resolved",
+            "path": "/var/lib/dpkg/info/systemd-resolved.postinst",
+            "serviceEffects": [
+              "\t\tsystemctl --system daemon-reload >/dev/null || true",
+              "\t\t\t_dh_action=restart",
+              "\t\tdeb-systemd-invoke $_dh_action 'systemd-resolved.service' >/dev/null || true"
+            ],
+            "sha256": "10f111799537f30a19935984d540f3e9f10e04c3028ecbda6572e00566f36ead"
+          },
+          {
+            "kind": "prerm",
+            "package": "systemd-resolved",
+            "path": "/var/lib/dpkg/info/systemd-resolved.prerm",
+            "serviceEffects": [
+              "\tdeb-systemd-invoke stop 'systemd-resolved.service' >/dev/null || true"
+            ],
+            "sha256": "e730fce1b6e66cdcd197dbac9c8355a4711a2dbcff9f6ba4374fc6dda98c4e75"
+          },
+          {
+            "kind": "postrm",
+            "package": "systemd-resolved",
+            "path": "/var/lib/dpkg/info/systemd-resolved.postrm",
+            "serviceEffects": [
+              "\tsystemctl --system daemon-reload >/dev/null || true"
+            ],
+            "sha256": "2404efc6c93bbd058dfbd9bcfce3f03fa9c58d0b2f7fda5d64020bf79ad21825"
+          },
+          {
+            "kind": "postinst",
+            "package": "systemd-sysv",
+            "path": "/var/lib/dpkg/info/systemd-sysv.postinst",
+            "serviceEffects": [
+              "\t\t\tln -sf ../bin/systemctl \"$fn\""
+            ],
+            "sha256": "062974408bce7a95f468fa523bcf7f3d6360fff31ed3b581125bdc4d0f648d4a"
+          },
+          {
+            "kind": "postinst",
+            "package": "systemd-timesyncd",
+            "path": "/var/lib/dpkg/info/systemd-timesyncd.postinst",
+            "serviceEffects": [
+              "\t\tsystemctl --system daemon-reload >/dev/null || true",
+              "\t\t\t_dh_action=restart",
+              "\t\tdeb-systemd-invoke $_dh_action 'systemd-time-wait-sync.service' 'systemd-timesyncd.service' >/dev/null || true"
+            ],
+            "sha256": "2d9c92cad433f0534bcaa25db390426cd575cea64e3acb0b43778c0cf2c668e9"
+          },
+          {
+            "kind": "prerm",
+            "package": "systemd-timesyncd",
+            "path": "/var/lib/dpkg/info/systemd-timesyncd.prerm",
+            "serviceEffects": [
+              "\tdeb-systemd-invoke stop 'systemd-time-wait-sync.service' 'systemd-timesyncd.service' >/dev/null || true"
+            ],
+            "sha256": "57f7887f1c9bc6bc2d7a980b7a3e37b08e36ad901086f3c66972b5bbd6e20aa4"
+          },
+          {
+            "kind": "postrm",
+            "package": "systemd-timesyncd",
+            "path": "/var/lib/dpkg/info/systemd-timesyncd.postrm",
+            "serviceEffects": [
+              "\tsystemctl --system daemon-reload >/dev/null || true"
+            ],
+            "sha256": "ff84641dff9eaee54ad8737716a0a57a68b7093d7d339d57711e3f68764940d7"
+          },
+          {
+            "kind": "preinst",
+            "package": "udev",
+            "path": "/var/lib/dpkg/info/udev.preinst",
+            "serviceEffects": [],
+            "sha256": "c75ae3e37774bee7a4656e15a70764496460130ba2f9b994bb7db768ffaf3ae8"
+          },
+          {
+            "kind": "postinst",
+            "package": "udev",
+            "path": "/var/lib/dpkg/info/udev.postinst",
+            "serviceEffects": [
+              "\t\tsystemctl --system daemon-reload >/dev/null || true",
+              "\t\t\t_dh_action=restart",
+              "\t\tdeb-systemd-invoke $_dh_action 'systemd-udevd.service' >/dev/null || true"
+            ],
+            "sha256": "ccaf4bcb94110ae616bfecffc70f124939356a0b4955da851bc8e28932b3afb4"
+          },
+          {
+            "kind": "prerm",
+            "package": "udev",
+            "path": "/var/lib/dpkg/info/udev.prerm",
+            "serviceEffects": [
+              "\tdeb-systemd-invoke stop 'systemd-udevd.service' >/dev/null || true"
+            ],
+            "sha256": "82915f7c7c18b8b5d31032aa3065bae76534bc21144131aa65688253ce496e74"
+          },
+          {
+            "kind": "postrm",
+            "package": "udev",
+            "path": "/var/lib/dpkg/info/udev.postrm",
+            "serviceEffects": [
+              "\tsystemctl --system daemon-reload >/dev/null || true"
+            ],
+            "sha256": "b8fda4281554f60742bf8b366944cbe4888cb62e884636d07966bb4125881d74"
+          }
+        ],
+        "nativeRootServices": "MainPID=1154\nId=systemd-networkd.service\nLoadState=loaded\nActiveState=active\nSubState=running\nInvocationID=e5ee45137c1f4009b568fa8abaa6cae2\n\nMainPID=3642403\nId=systemd-journald.service\nLoadState=loaded\nActiveState=active\nSubState=running\nInvocationID=36055eb044fa4ab6a633b5dc04c98b59\n\nMainPID=573\nId=systemd-resolved.service\nLoadState=loaded\nActiveState=active\nSubState=running\nInvocationID=cc55517ef4c148fea25781318c9edef0\n\nMainPID=451\nId=systemd-timesyncd.service\nLoadState=loaded\nActiveState=active\nSubState=running\nInvocationID=ca6cc20f110b4df885f2606ce29f1faf\n\nMainPID=468\nId=systemd-udevd.service\nLoadState=loaded\nActiveState=active\nSubState=running\nInvocationID=5f72c6d3c11443a1b8fb6d7199390c8a\n",
+        "nativeUserManagers": "[{\"unit\":\"user@1000.service\",\"load\":\"loaded\",\"active\":\"active\",\"sub\":\"running\",\"description\":\"User Manager for UID 1000\"},{\"unit\":\"user@1001.service\",\"load\":\"loaded\",\"active\":\"active\",\"sub\":\"running\",\"description\":\"User Manager for UID 1001\"}]\n"
+      }
     }
   },
   "operatingReceiving": [
