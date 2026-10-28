@@ -1,8 +1,18 @@
 #!/bin/bash
 set -euo pipefail
 umask 022
-source_version=257.9-0ubuntu2.5
-product_version=257.9-0ubuntu2.5+rce.emptythaw1
+source_version=$(python3 - <<'PY'
+from pathlib import Path
+import hashlib,json,re
+root=Path("/source")
+r=json.loads((root/"data/records/native-manager-repair-records/emptythaw2.json").read_text())
+assert r["kind"]=="rce.systemd-native-manager-repair-intent/v1" and r["version"]==1
+assert r["sourceDateEpoch"]==int(__import__("os").environ["SOURCE_DATE_EPOCH"])
+assert all(re.fullmatch(r"[0-9A-Za-z.+:~-]+",r[key]) for key in ("sourceVersion","productVersion"))
+assert hashlib.sha256((root/r["patch"]["path"]).read_bytes()).hexdigest()==r["patch"]["sha256"]
+print(r["sourceVersion"])
+PY
+)
 source_root=/work/source
 mkdir -p "$source_root" /out
 retain_build_evidence(){
@@ -48,9 +58,10 @@ sha256sum src/core/unit.c > /out/patched-unit-source.sha256
 python3 - <<'PY'
 from pathlib import Path
 import email.utils
-import os
+import os,json
+intent=json.loads(Path("/source/data/records/native-manager-repair-records/emptythaw2.json").read_text())
 p=Path("debian/changelog")
-head=("systemd (257.9-0ubuntu2.5+rce.emptythaw1) questing; urgency=medium\n\n"
+head=("systemd ("+intent["productVersion"]+") questing; urgency=medium\n\n"
       "  * Receive explicit thaw of an empty, non-active, cached-frozen unit.\n"
       "    Original registry migration Work599; no automatic version allocation.\n\n"
       " -- emsenn <emsenn@emsenn.net>  "+email.utils.formatdate(int(os.environ["SOURCE_DATE_EPOCH"]),usegmt=False)+"\n\n")
@@ -71,6 +82,7 @@ for p in sorted(source.iterdir()):
 inventory=subprocess.check_output(["dpkg-query","--show","--showformat=${binary:Package} ${Version}\n"],text=True)
 (destination/"build-package-inventory.txt").write_text(inventory)
 patch=Path("/source/patches/systemd-empty-frozen-thaw.patch").read_bytes()
-receipt={"kind":"rce.systemd-manager-package-product/v1","sourceVersion":"257.9-0ubuntu2.5","productVersion":"257.9-0ubuntu2.5+rce.emptythaw1","ownerCommit":os.environ["OWNER_COMMIT"],"sourceDateEpoch":int(os.environ["SOURCE_DATE_EPOCH"]),"patchSha256":hashlib.sha256(patch).hexdigest(),"files":files}
+intent=json.loads(Path("/source/data/records/native-manager-repair-records/emptythaw2.json").read_text())
+receipt={"kind":"rce.systemd-manager-package-product/v1","sourceVersion":intent["sourceVersion"],"productVersion":intent["productVersion"],"ownerCommit":os.environ["OWNER_COMMIT"],"sourceDateEpoch":int(os.environ["SOURCE_DATE_EPOCH"]),"patchSha256":hashlib.sha256(patch).hexdigest(),"files":files}
 (destination/"product.json").write_text(json.dumps(receipt,sort_keys=True,indent=2)+"\n")
 PY

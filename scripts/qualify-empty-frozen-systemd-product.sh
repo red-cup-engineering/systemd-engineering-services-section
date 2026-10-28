@@ -68,7 +68,9 @@ raw=record.read_bytes();r=json.loads(raw)
 assert r["kind"]=="rce.systemd-retained-product-input/v1" and r["version"]==1
 assert r["repository"]=="red-cup-engineering/systemd-engineering-services-section"
 assert r["producerCommit"].startswith(key) and re.fullmatch(r"[a-f0-9]{40}",r["producerCommit"])
-assert r["sourceVersion"]=="257.9-0ubuntu2.5" and r["productVersion"]=="257.9-0ubuntu2.5+rce.emptythaw1"
+intent=json.loads((repo/"data/records/native-manager-repair-records/emptythaw2.json").read_bytes())
+assert intent["kind"]=="rce.systemd-native-manager-repair-intent/v1" and intent["version"]==1
+assert r["sourceVersion"]==intent["sourceVersion"] and r["productVersion"]==intent["productVersion"]
 assert r["sourceDateEpoch"]==int(os.environ["SOURCE_DATE_EPOCH"])
 assert r["patchSha256"]==hashlib.sha256((repo/"patches/systemd-empty-frozen-thaw.patch").read_bytes()).hexdigest()
 assert 0<r["artifactBytes"]<=67108864 and 0<r["uncompressedBytes"]<=268435456 and r["fileCount"]<=512
@@ -134,7 +136,7 @@ for item in p["files"]:
     with target.open("rb") as incoming:
         while chunk:=incoming.read(1048576): digest.update(chunk)
     assert target.stat().st_size==item["bytes"] and digest.hexdigest()==item["sha256"]
-required={name+"_257.9-0ubuntu2.5+rce.emptythaw1_amd64.deb" for name in ("systemd","libsystemd-shared","libsystemd0")}
+required={name+"_"+intent["productVersion"]+"_amd64.deb" for name in ("systemd","libsystemd-shared","libsystemd0")}
 assert {item["name"] for item in r["nativePackageInputs"]}==required
 assert all(item in p["files"] for item in r["nativePackageInputs"])
 assert (product/"vendor-build-exit-code.txt").read_text().strip()=="0"
