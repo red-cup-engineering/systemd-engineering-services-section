@@ -52,17 +52,111 @@ pathlib.Path(path,"capacity-"+stage+".json").write_text(json.dumps(row,sort_keys
 assert row["admitted"], "original factory capacity refused"
 PY
 }
+receive_retained_product(){
+  python3 - "$repo" "$out" <<'PY'
+import hashlib,json,os,pathlib,re,stat,sys,urllib.error,urllib.parse,urllib.request,zipfile
+repo,out=map(pathlib.Path,sys.argv[1:])
+key=os.environ["RETAINED_PRODUCT_RECORD"]
+assert re.fullmatch(r"[a-f0-9]{12}",key), "exact owned product record required"
+record=repo/"data/records/native-manager-product-records"/(key+".json")
+assert record.is_file() and not record.is_symlink() and record.stat().st_size<=65536
+raw=record.read_bytes();r=json.loads(raw)
+assert r["kind"]=="rce.systemd-retained-product-input/v1" and r["version"]==1
+assert r["repository"]=="red-cup-engineering/systemd-engineering-services-section"
+assert r["producerCommit"].startswith(key) and re.fullmatch(r"[a-f0-9]{40}",r["producerCommit"])
+assert r["sourceVersion"]=="257.9-0ubuntu2.5" and r["productVersion"]=="257.9-0ubuntu2.5+rce.emptythaw1"
+assert r["sourceDateEpoch"]==int(os.environ["SOURCE_DATE_EPOCH"])
+assert r["patchSha256"]==hashlib.sha256((repo/"patches/systemd-empty-frozen-thaw.patch").read_bytes()).hexdigest()
+assert 0<r["artifactBytes"]<=67108864 and 0<r["uncompressedBytes"]<=268435456 and r["fileCount"]<=512
+assert r["vendorBuild"]=={"passed":1690,"skipped":26,"failed":0,"exitCode":0}
+token=os.environ["RETAINED_PRODUCT_TOKEN"]
+assert token and os.environ["GITHUB_REPOSITORY"]==r["repository"]
+api="https://api.github.com/repos/"+r["repository"]+"/actions/artifacts/"+str(r["artifactId"])
+headers={"Authorization":"Bearer "+token,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"}
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self,*args,**kwargs): return None
+opener=urllib.request.build_opener(NoRedirect)
+with opener.open(urllib.request.Request(api,headers=headers),timeout=30) as response:
+    meta=json.load(response)
+assert meta["id"]==r["artifactId"] and not meta["expired"]
+assert meta["size_in_bytes"]==r["artifactBytes"] and meta["digest"]=="sha256:"+r["artifactSha256"]
+assert meta["workflow_run"]["id"]==r["runId"] and meta["workflow_run"]["head_sha"]==r["producerCommit"]
+custody=out/"retained-input";custody.mkdir(mode=0o700)
+(custody/"source-input.json").write_bytes(raw)
+(custody/"provider-metadata.json").write_text(json.dumps(meta,sort_keys=True)+"\n")
+try:
+    opener.open(urllib.request.Request(api+"/zip",headers=headers),timeout=30)
+    raise RuntimeError("original signed artifact redirect absent")
+except urllib.error.HTTPError as error:
+    if error.code!=302: raise RuntimeError("original artifact API refused: HTTP "+str(error.code)) from None
+    location=error.headers["Location"]
+parsed=urllib.parse.urlsplit(location)
+assert parsed.scheme=="https" and not parsed.username and not parsed.password
+archive=custody/"original-product.zip";digest=hashlib.sha256();size=0
+try:
+    with opener.open(urllib.request.Request(location),timeout=60) as response,archive.open("xb") as target:
+        assert response.status==200
+        while chunk:=response.read(1048576):
+            size+=len(chunk);assert size<=r["artifactBytes"]
+            target.write(chunk);digest.update(chunk)
+except urllib.error.URLError:
+    raise RuntimeError("original signed artifact byte transport unreceived") from None
+assert size==r["artifactBytes"] and digest.hexdigest()==r["artifactSha256"]
+with zipfile.ZipFile(archive) as source:
+    files=[item for item in source.infolist() if not item.is_dir()]
+    assert len(files)==r["fileCount"] and sum(item.file_size for item in files)==r["uncompressedBytes"]
+    seen=set()
+    for item in files:
+        path=pathlib.PurePosixPath(item.filename)
+        assert not path.is_absolute() and all(part not in ("",".","..") for part in path.parts)
+        assert item.filename not in seen and not stat.S_ISLNK(item.external_attr>>16)
+        assert item.file_size<=67108864
+        seen.add(item.filename)
+        target=(out.joinpath(*path.parts) if path.parts[0]=="product"
+                else custody.joinpath("producer-metadata",*path.parts))
+        target.parent.mkdir(parents=True,exist_ok=True,mode=0o700)
+        with source.open(item) as incoming,target.open("xb") as destination:
+            while chunk:=incoming.read(1048576): destination.write(chunk)
+        assert target.stat().st_size==item.file_size
+product=out/"product";manifest=product/"product.json"
+assert hashlib.sha256(manifest.read_bytes()).hexdigest()==r["productManifestSha256"]
+p=json.loads(manifest.read_bytes())
+assert p["ownerCommit"]==r["producerCommit"] and p["patchSha256"]==r["patchSha256"]
+assert p["sourceVersion"]==r["sourceVersion"] and p["productVersion"]==r["productVersion"]
+assert p["sourceDateEpoch"]==r["sourceDateEpoch"]
+for item in p["files"]:
+    assert pathlib.PurePosixPath(item["name"]).name==item["name"]
+    target=product/item["name"];digest=hashlib.sha256()
+    with target.open("rb") as incoming:
+        while chunk:=incoming.read(1048576): digest.update(chunk)
+    assert target.stat().st_size==item["bytes"] and digest.hexdigest()==item["sha256"]
+required={name+"_257.9-0ubuntu2.5+rce.emptythaw1_amd64.deb" for name in ("systemd","libsystemd-shared","libsystemd0")}
+assert {item["name"] for item in r["nativePackageInputs"]}==required
+assert all(item in p["files"] for item in r["nativePackageInputs"])
+assert (product/"vendor-build-exit-code.txt").read_text().strip()=="0"
+(custody/"received.json").write_text(json.dumps({"kind":"rce.systemd-retained-product-receiving/v1",
+    "producerCommit":p["ownerCommit"],"consumerCommit":os.environ["OWNER_COMMIT"],
+    "artifactSha256":r["artifactSha256"],"productManifestSha256":r["productManifestSha256"],
+    "nativePackageInputs":r["nativePackageInputs"],"recompiled":False},sort_keys=True)+"\n")
+PY
+}
+if test -n "${RETAINED_PRODUCT_RECORD:-}"; then
+  admit retained-product
+  receive_retained_product
+fi
 admit baseline
 docker build --label rce.owner-commit="$commit" --tag "$baseline" --file "$repo/test/systemd-baseline.Dockerfile" "$repo"
 docker image inspect "$baseline" > "$out/baseline-image.json"
-admit build
-docker run --rm --name rce-systemd-builder-"${commit:0:12}" \
-  --label rce.owner-commit="$commit" --memory=6g --memory-swap=6g --cpus=2 \
-  --cap-add SYS_ADMIN --security-opt apparmor=unconfined --cgroupns=private --tmpfs /run:size=16m \
-  --env OWNER_COMMIT="$commit" --env SOURCE_DATE_EPOCH \
-  --mount type=bind,src="$repo",dst=/source,readonly \
-  --mount type=bind,src="$out/product",dst=/out \
-  "$baseline" /bin/bash /source/scripts/build-empty-frozen-systemd-product.sh
+if test -z "${RETAINED_PRODUCT_RECORD:-}"; then
+  admit build
+  docker run --rm --name rce-systemd-builder-"${commit:0:12}" \
+    --label rce.owner-commit="$commit" --memory=6g --memory-swap=6g --cpus=2 \
+    --cap-add SYS_ADMIN --security-opt apparmor=unconfined --cgroupns=private --tmpfs /run:size=16m \
+    --env OWNER_COMMIT="$commit" --env SOURCE_DATE_EPOCH \
+    --mount type=bind,src="$repo",dst=/source,readonly \
+    --mount type=bind,src="$out/product",dst=/out \
+    "$baseline" /bin/bash /source/scripts/build-empty-frozen-systemd-product.sh
+fi
 admit patched
 docker build --label rce.owner-commit="$commit" --build-arg BASE_IMAGE="$baseline" \
   --tag "$patched" --file "$repo/test/systemd-patched.Dockerfile" "$out"
@@ -82,8 +176,9 @@ for mode in baseline patched; do
   docker exec "$cid" journalctl --no-pager --output=json > "$out/$mode-journal.jsonl"
 done
 python3 - "$out" <<'PY'
-import hashlib,json,pathlib,sys
+import hashlib,json,pathlib,sys,os
 root=pathlib.Path(sys.argv[1])
+product=json.loads((root/"product/product.json").read_text())
 baseline=json.loads((root/"baseline-native-receiving.json").read_text())
 patched=json.loads((root/"patched-native-receiving.json").read_text())
 assert baseline["verdict"]=="original-defect-reproduced"
@@ -96,5 +191,5 @@ files=[]
 for p in sorted(root.iterdir()):
     if p.is_file():
         files.append({"name":p.name,"bytes":p.stat().st_size,"sha256":hashlib.sha256(p.read_bytes()).hexdigest()})
-(root/"native-qualification.json").write_text(json.dumps({"kind":"rce.systemd-manager-native-qualification/v1","baseline":baseline["verdict"],"patched":patched["verdict"],"productionEffects":False,"files":files},sort_keys=True,indent=2)+"\n")
+(root/"native-qualification.json").write_text(json.dumps({"kind":"rce.systemd-manager-native-qualification/v1","consumerCommit":os.environ["OWNER_COMMIT"],"productProducerCommit":product["ownerCommit"],"productManifestSha256":hashlib.sha256((root/"product/product.json").read_bytes()).hexdigest(),"baseline":baseline["verdict"],"patched":patched["verdict"],"productionEffects":False,"files":files},sort_keys=True,indent=2)+"\n")
 PY
