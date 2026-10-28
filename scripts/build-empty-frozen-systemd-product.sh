@@ -29,7 +29,11 @@ PY
 apt-get update
 apt-get install --yes --no-install-recommends build-essential dpkg-dev ca-certificates patch util-linux
 # Receive the mount authority used by the unmodified vendor test suite.
-unshare --mount --propagation slave /bin/true
+unshare --mount --propagation slave /bin/sh -ec '
+  mountpoint --quiet /run
+  mount --options remount,ro /run
+  mount --options remount,rw /run
+'
 cd "$source_root"
 apt-get source --download-only "systemd=$source_version"
 printf '%s\n' \
