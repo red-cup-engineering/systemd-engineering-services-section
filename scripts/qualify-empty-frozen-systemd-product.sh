@@ -58,6 +58,7 @@ docker image inspect "$baseline" > "$out/baseline-image.json"
 admit build
 docker run --rm --name rce-systemd-builder-"${commit:0:12}" \
   --label rce.owner-commit="$commit" --memory=6g --memory-swap=6g --cpus=2 \
+  --cap-add SYS_ADMIN --security-opt apparmor=unconfined --cgroupns=private \
   --env OWNER_COMMIT="$commit" --env SOURCE_DATE_EPOCH \
   --mount type=bind,src="$repo",dst=/source,readonly \
   --mount type=bind,src="$out/product",dst=/out \
