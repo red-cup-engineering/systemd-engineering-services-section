@@ -11,12 +11,15 @@ case "$commit" in (*[!a-f0-9]*|'') exit 1;; esac
 test "${#commit}" = 40
 baseline=rce-systemd-baseline:"$commit"
 patched=rce-systemd-patched:"$commit"
-containers=()
 cleanup(){
-  for cid in "${containers[@]}"; do
+  for mode in baseline patched; do
+    test -f "$out/$mode-container.cid" || continue
+    cid=$(cat "$out/$mode-container.cid")
+    [[ "$cid" =~ ^[a-f0-9]{64}$ ]] || return 1
     current=$(docker inspect --format '{{index .Config.Labels "rce.owner-commit"}}' "$cid" 2>/dev/null || true)
     if test "$current" = "$commit"; then
       docker inspect "$cid" > "$out/container-$cid-before-retirement.json"
+      docker logs "$cid" > "$out/$mode-container.stdout" 2> "$out/$mode-container.stderr" || true
       python3 "$repo/scripts/retire-owned-native-container.py" "$cid" "$commit" "$out"
     else
       printf '%s\n' "Original container ownership changed; retained $cid" >&2
@@ -164,12 +167,62 @@ docker image inspect "$patched" > "$out/patched-image.json"
 for mode in baseline patched; do
   image=$baseline
   if test "$mode" = patched; then image=$patched; fi
-  cid=$(docker run --detach --privileged --cgroupns=private --network=none \
-    --memory=512m --memory-swap=512m --cpus=1 \
-    --label rce.owner-commit="$commit" --label rce.work=registry-migration-599 \
-    --tmpfs /run --tmpfs /run/lock "$image")
-  containers+=("$cid")
-  docker inspect "$cid" > "$out/$mode-container.json"
+  python3 - "$out" "$mode" "$image" "$commit" <<'PY'
+import json,os,pathlib,re,select,socket,struct,subprocess,sys,time
+out=pathlib.Path(sys.argv[1]);mode,image,commit=sys.argv[2:]
+def run(*args):
+    return subprocess.run(args,check=True,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+directory=out/(mode+"-notify");directory.mkdir(mode=0o700)
+with socket.socket(socket.AF_UNIX,socket.SOCK_DGRAM) as notify:
+    notify.setsockopt(socket.SOL_SOCKET,socket.SO_PASSCRED,1)
+    notify.bind(str(directory/"notify"))
+    cid=run("docker","create","--privileged","--cgroupns=private","--network=none",
+        "--memory=512m","--memory-swap=512m","--cpus=1",
+        "--label","rce.owner-commit="+commit,"--label","rce.work=registry-migration-599",
+        "--tmpfs","/run","--tmpfs","/run/lock",
+        "--mount","type=bind,src="+str(directory)+",dst=/run/host,readonly",
+        "--env","NOTIFY_SOCKET=/run/host/notify",image).stdout.strip()
+    assert re.fullmatch(r"[a-f0-9]{64}",cid)
+    # Record ownership before start so failed boot remains exactly retireable.
+    with (out/(mode+"-container.cid")).open("x") as record:
+        record.write(cid+"\n");record.flush();os.fsync(record.fileno())
+    run("docker","start",cid)
+    before=json.loads(run("docker","inspect",cid).stdout)[0]
+    (out/(mode+"-container.json")).write_text(json.dumps([before],sort_keys=True)+"\n")
+    assert before["Id"]==cid and before["Config"]["Labels"]["rce.owner-commit"]==commit
+    state=before["State"];pid=state["Pid"]
+    assert state["Running"] and pid>0, "original container exited before manager readiness"
+    pidfd=os.pidfd_open(pid)
+    try:
+        current=json.loads(run("docker","inspect",cid).stdout)[0]
+        assert current["State"]["Pid"]==pid and current["State"]["StartedAt"]==state["StartedAt"]
+        assert current["Config"]["Labels"]["rce.owner-commit"]==commit
+        deadline=time.monotonic()+300
+        received=[]
+        while True:
+            ready,_,_=select.select([notify,pidfd],[],[],max(0,deadline-time.monotonic()))
+            assert ready, "manager readiness observation budget exhausted; not qualified"
+            assert pidfd not in ready, "original manager exited before readiness"
+            payload,ancillary,flags,_=notify.recvmsg(65536,socket.CMSG_SPACE(struct.calcsize("3i")))
+            assert not flags&(socket.MSG_TRUNC|socket.MSG_CTRUNC)
+            credentials=[struct.unpack("3i",data) for level,kind,data in ancillary
+                if level==socket.SOL_SOCKET and kind==socket.SCM_CREDENTIALS]
+            assert len(credentials)==1 and credentials[0][:2]==(pid,0)
+            fields=payload.decode().splitlines()
+            received.append({"fields":fields,"senderPid":credentials[0][0],"senderUid":credentials[0][1]})
+            assert len(received)<=128, "unexpected manager readiness message volume"
+            if "READY=1" in fields:
+                assert not select.select([pidfd],[],[],0)[0], "original manager exited at readiness"
+                (out/(mode+"-manager-readiness.json")).write_text(json.dumps({
+                    "kind":"rce.native-container-manager-readiness/v1","container":cid,
+                    "commit":commit,"pid":pid,"startedAt":state["StartedAt"],
+                    "basis":"original-pidfd-and-kernel-SCM_CREDENTIALS-READY=1",
+                    "notifications":received,"ready":True},sort_keys=True)+"\n")
+                break
+    finally:
+        os.close(pidfd)
+PY
+  cid=$(cat "$out/$mode-container.cid")
   readiness=$(docker exec "$cid" systemctl is-system-running --wait || true)
   case "$readiness" in (running|degraded) ;; (*) printf '%s\n' "$readiness"; exit 1;; esac
   docker exec "$cid" python3 /opt/rce/qualify-empty-frozen-thaw.py "$mode" > "$out/$mode-native-receiving.json"
