@@ -1,0 +1,14 @@
+--- a/src/core/unit.c
++++ b/src/core/unit.c
+@@ -6365,7 +6365,10 @@ int unit_freezer_action(Unit *u, FreezerAction action) {
+ 
+         s = unit_active_state(u);
+-        if (s != UNIT_ACTIVE)
++        if (s != UNIT_ACTIVE &&
++            !(action == FREEZER_THAW &&
++              u->freezer_state == FREEZER_FROZEN &&
++              unit_cgroup_is_empty(u) > 0))
+                 return -EHOSTDOWN;
+ 
+         if (action == FREEZER_FREEZE && IN_SET(u->freezer_state, FREEZER_FREEZING, FREEZER_FREEZING_BY_PARENT))
+                 return -EALREADY;

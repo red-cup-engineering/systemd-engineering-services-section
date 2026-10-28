@@ -1,0 +1,31 @@
+# Empty frozen native unit recovery
+
+This is original registry migration repair [Work599](https://github.com/561-group/561-group-bare-cedar-fog-services-section/issues/599), through the existing systemd engineering owner. Its inventory observer remains read-only. No second publisher, fallback runtime, host debugger, mutable binary patch or unqualified manager restart is admitted.
+
+Actual Cold Red Gate runs Ubuntu25.10 systemd257.9-0ubuntu2.5. The original publisher was externally killed while frozen. Native receiving shows MainPID0, ControlPID0, no Job and no remaining original cgroup, while systemd retains the original InvocationID, FreezerState=frozen and auto-restart-queued. One private finite CDE fixture reproduced the same state using only its captured pidfd/PID. Ordinary thaw refuses “Unit is not active”; stop, including direct Manager.StopUnit, refuses the cached frozen state.
+
+The vendor source is the defect owner. In unit_freezer_action, the active-only gate rejects the needed empty-unit thaw, while unit_stop rejects every non-running freezer state. unit-serialize saves freezer-state verbatim, deserialization restores it, and service_coldplug restores the queued restart state. An unmodified daemon-reexec is not receiving for this defect.
+
+The source correction admits THAW for a non-active, explicitly frozen unit only when unit_cgroup_is_empty returns positive. FREEZE remains active-only. Existing unsupported-unit, pending-job, load-state, ongoing-operation and parent-freeze gates remain. An unread or populated cgroup refuses the new case. The original unit_cgroup_freezer_action already resolves a missing cgroup to the finished RUNNING state. The operation neither starts a service nor changes payload data.
+
+The exact vendor source is Ubuntu systemd257.9-0ubuntu2.5, retaining its existing Debian/security patches and production build features:
+
+- systemd_257.9.orig.tar.gz:16,401,765bytes, SHA256b27dcc100a738b4b5b81f7c5174c1239a6495f5bdf3d3caa94a17b8373e6a1ca.
+- systemd_257.9-0ubuntu2.5.debian.tar.xz:255,832bytes, SHA256edf2e73f46ac5e35af5f76c6e5a6768c0eab45727b64c0f5b078655cfa7a4a2d.
+- The vendor signed source descriptor is https://archive.ubuntu.com/ubuntu/pool/main/s/systemd/systemd_257.9-0ubuntu2.5.dsc. Source acquisition must use authenticated native APT source indices and verify the declared hashes; descriptor availability alone is not signature receiving.
+
+The owned dispatch-only factory builds the complete original distribution package set in an isolated Ubuntu25.10 build container. It never installs development dependencies on Bare Cedar Fog or Cold Red Gate. Its one explicit local revision is257.9-0ubuntu2.5+rce.emptythaw1; no history counter allocates editions. It retains source/package hashes, original build features, package inventory, buildinfo and the exact patch. The native negative control uses the unmodified distribution manager in a private container; the positive control uses the actually built manager. Both preserve a strong pending ExecCondition before the empty-unit thaw attempt. A second positive boundary uses one native main and its actual pidfd-received detached child: kill only the frozen main, receive the non-active populated group, prove THAW still refuses, then kill only that original child and receive empty-only THAW/stop. No artificial watchdog/runtime deadline or scheduled state polling is used. Inactive FREEZE must still refuse. Only exact owned fixture/container identities may be terminated. No production unit or host manager is controlled by this factory.
+
+The resulting package product is not automatically installed. Original native Code and machine operations must receive its complete binary/dependency closure, target package/ABI compatibility, resource admission, rollback retention and the impact of manager adoption. The manager change affects its entire native authority, so an unqualified global reexec or replacement is forbidden. Before any publisher thaw/stop, receive the original pending startup fence and independently establish MainPID0, ControlPID0, exact InvocationID and quiescence of the originally captured cgroup. After the qualified manager correction, receive THAW and terminal stop on that exact original invocation; then continue the held single-runtime selection. Original prepared inputs and uncertain effects remain retained.
+
+The original cached fixture remains fenced and contains no process or cgroup until actual manager repair. Removing its guard/link would not settle that native state. The operating repair is complete only after the real manager and original publisher unit receive the corrected behavior; CI products, source tests and this document do not close Work599.
+
+Primary vendor evidence:
+https://github.com/systemd/systemd/blob/v257/src/core/unit.c
+https://github.com/systemd/systemd/blob/v257/src/core/cgroup.c
+https://github.com/systemd/systemd/blob/v257/src/core/unit-serialize.c
+https://github.com/systemd/systemd/blob/v257/src/core/service.c
+https://github.com/systemd/systemd/issues/38517
+https://github.com/systemd/systemd/issues/37569
+
+The factory uses the existing public-repository ubuntu-24.04 runner contract (dedicated VM,4CPU,16GBRAM,14GBSSD) and receives its actual native capacity before each growing stage. EightGiB peak plus twoGiB growth are estimates, charged against both observed guest headroom and the declared provider allocation; no deletion of unrelated runner data is admitted. The provider contract is https://docs.github.com/en/actions/reference/runners/github-hosted-runners. Its actual run/job/image identities and native observations remain in the product. This is a slot observation, not a reservation against other writers.
