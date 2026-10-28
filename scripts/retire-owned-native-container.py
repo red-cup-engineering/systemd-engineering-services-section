@@ -11,13 +11,13 @@ state=before["State"]
 pid=state["Pid"]
 assert isinstance(pid,int) and pid>=0
 if pid==0:
-    assert state["Status"] in ("exited","dead")
+    assert state["Status"] in ("created","exited","dead")
     assert not state["Running"] and not state["Restarting"] and not state["Paused"]
     assert isinstance(state["ExitCode"],int)
     # Without --force, concurrent native reuse refuses rather than stopping it.
     run("docker","rm",cid)
     assert run("docker","inspect",cid,check=False).returncode!=0
-    receipt={"kind":"rce.owned-native-container-retirement/v1","container":cid,"commit":commit,"image":before["Image"],"basis":"already-terminal-native-container-state","state":state,"pidfdReceived":False,"containerAbsent":True}
+    receipt={"kind":"rce.owned-native-container-retirement/v1","container":cid,"commit":commit,"image":before["Image"],"basis":("owned-container-never-started" if state["Status"]=="created" else "already-terminal-native-container-state"),"state":state,"pidfdReceived":False,"containerAbsent":True}
 else:
     pidfd=os.pidfd_open(pid)
     lines=pathlib.Path("/proc",str(pid),"cgroup").read_text().splitlines()
