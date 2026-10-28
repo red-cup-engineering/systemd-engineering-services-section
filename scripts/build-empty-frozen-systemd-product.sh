@@ -5,6 +5,20 @@ source_version=257.9-0ubuntu2.5
 product_version=257.9-0ubuntu2.5+rce.emptythaw1
 source_root=/work/source
 mkdir -p "$source_root" /out
+retain_build_evidence(){
+  build_status=$?
+  trap - EXIT
+  for evidence in "$source_root"/systemd_*.dsc "$source_root"/systemd_*.tar.gz "$source_root"/systemd_*.tar.xz; do
+    if test -f "$evidence"; then cp -- "$evidence" /out/; fi
+  done
+  for evidence in testlog.txt testlog.json testlog.junit.xml meson-log.txt; do
+    original="$source_root/tree/obj-x86_64-linux-gnu/meson-logs/$evidence"
+    if test -f "$original"; then cp -- "$original" "/out/$evidence"; fi
+  done
+  printf '%s\n' "$build_status" > /out/vendor-build-exit-code.txt
+  exit "$build_status"
+}
+trap retain_build_evidence EXIT
 # This is the disposable, declared build container, never a tenant host.
 python3 - <<'PY'
 from pathlib import Path
@@ -13,7 +27,9 @@ for p in Path("/etc/apt/sources.list.d").glob("*.sources"):
     p.write_text(text.replace("Types: deb\n", "Types: deb deb-src\n"))
 PY
 apt-get update
-apt-get install --yes --no-install-recommends build-essential dpkg-dev ca-certificates patch
+apt-get install --yes --no-install-recommends build-essential dpkg-dev ca-certificates patch util-linux
+# Receive the mount authority used by the unmodified vendor test suite.
+unshare --mount --propagation slave /bin/true
 cd "$source_root"
 apt-get source --download-only "systemd=$source_version"
 printf '%s\n' \
