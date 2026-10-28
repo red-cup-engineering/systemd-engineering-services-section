@@ -1,0 +1,140 @@
+{
+  "version": 1,
+  "kind": "rce.native-manager-recovery/v1",
+  "owner": "red-cup-engineering/systemd-engineering-services-section",
+  "work": "https://github.com/561-group/561-group-bare-cedar-fog-services-section/issues/599",
+  "target": {
+    "host": "cold-red-gate",
+    "distribution": "Ubuntu 25.10",
+    "architecture": "amd64",
+    "manager": {
+      "authority": "user@1001.service",
+      "uid": 1001,
+      "originalPID": 1314,
+      "originalInvocation": "2e32ae1298b34543a9c63acdbf045e35",
+      "originalExecutable": "/usr/lib/systemd/systemd",
+      "originalExecutableSha256": "b1997f7c54ccece6ad4dbe213c04780e8c103e60c0b70ed62601fac29588e73c"
+    },
+    "observedUserServiceCount": 61,
+    "originalEmptyFrozenUnits": [
+      "github-pin-events.service",
+      "codex-cde-publisher-freeze-2115656.service"
+    ]
+  },
+  "selection": {
+    "sourceVersion": "257.9-0ubuntu2.5",
+    "intendedVersion": "257.9-0ubuntu2.5+rce.emptythaw1",
+    "sourceFactory": {
+      "repository": "red-cup-engineering/systemd-engineering-services-section",
+      "commit": "32728ffe8fa8fa8c423ae7c5128352864c6b71b2",
+      "run": 40750517230
+    },
+    "packages": [
+      {
+        "package": "libnss-systemd:amd64",
+        "architecture": "amd64",
+        "predecessorVersion": "257.9-0ubuntu2.5",
+        "intendedVersion": "257.9-0ubuntu2.5+rce.emptythaw1"
+      },
+      {
+        "package": "libpam-systemd:amd64",
+        "architecture": "amd64",
+        "predecessorVersion": "257.9-0ubuntu2.5",
+        "intendedVersion": "257.9-0ubuntu2.5+rce.emptythaw1"
+      },
+      {
+        "package": "libsystemd-shared:amd64",
+        "architecture": "amd64",
+        "predecessorVersion": "257.9-0ubuntu2.5",
+        "intendedVersion": "257.9-0ubuntu2.5+rce.emptythaw1"
+      },
+      {
+        "package": "libsystemd0:amd64",
+        "architecture": "amd64",
+        "predecessorVersion": "257.9-0ubuntu2.5",
+        "intendedVersion": "257.9-0ubuntu2.5+rce.emptythaw1"
+      },
+      {
+        "package": "libudev1:amd64",
+        "architecture": "amd64",
+        "predecessorVersion": "257.9-0ubuntu2.5",
+        "intendedVersion": "257.9-0ubuntu2.5+rce.emptythaw1"
+      },
+      {
+        "package": "systemd",
+        "architecture": "amd64",
+        "predecessorVersion": "257.9-0ubuntu2.5",
+        "intendedVersion": "257.9-0ubuntu2.5+rce.emptythaw1"
+      },
+      {
+        "package": "systemd-cryptsetup",
+        "architecture": "amd64",
+        "predecessorVersion": "257.9-0ubuntu2.5",
+        "intendedVersion": "257.9-0ubuntu2.5+rce.emptythaw1"
+      },
+      {
+        "package": "systemd-resolved",
+        "architecture": "amd64",
+        "predecessorVersion": "257.9-0ubuntu2.5",
+        "intendedVersion": "257.9-0ubuntu2.5+rce.emptythaw1"
+      },
+      {
+        "package": "systemd-sysv",
+        "architecture": "amd64",
+        "predecessorVersion": "257.9-0ubuntu2.5",
+        "intendedVersion": "257.9-0ubuntu2.5+rce.emptythaw1"
+      },
+      {
+        "package": "systemd-timesyncd",
+        "architecture": "amd64",
+        "predecessorVersion": "257.9-0ubuntu2.5",
+        "intendedVersion": "257.9-0ubuntu2.5+rce.emptythaw1"
+      },
+      {
+        "package": "udev",
+        "architecture": "amd64",
+        "predecessorVersion": "257.9-0ubuntu2.5",
+        "intendedVersion": "257.9-0ubuntu2.5+rce.emptythaw1"
+      }
+    ],
+    "allowNewPackages": false,
+    "allowRemovedPackages": false,
+    "dependencyResolution": "Native APT simulation must select exactly this installed eleven-package source family, receive all strict equality dependencies, and require no network or new package."
+  },
+  "productReceiving": [
+    "Require completed original vendor tests plus baseline defect and patched empty/populated native controls; no failure reclassification.",
+    "Receive exact official original eleven-package predecessor archives from authenticated native APT metadata before any installation.",
+    "Receive current CI package manifest, every selected archive hash/name/version/architecture, exact source descriptor and patch; verify finite ZIP entries, sizes and no links/traversal.",
+    "Construct and register immutable whole package and predecessor products through original Guix local-file Code primitive; retain native GC roots before target use.",
+    "Receive actual ELF architecture/interpreter/NEEDED symbols and --version/build features against this target closure; admit disk/inodes/memory afresh.",
+    "Receive every installed predecessor version, manager PID/birth/invocation/executable/maps, all system/user authority jobs and unchanged original startup-fence hashes immediately before install."
+  ],
+  "nativeEffect": {
+    "provider": "original Ubuntu APT/dpkg systemd package owner",
+    "operation": "Install exactly the received eleven local immutable package archives through native APT, with no-download, no extra packages and no unattended replay.",
+    "vendorPostinst": {
+      "systemManager": "daemon-reexec",
+      "userManagers": "SIGRTMIN+25 to every currently running user@*.service main process, asynchronous",
+      "serviceEffects": [
+        "try-restart systemd-networkd.service",
+        "try-restart systemd-journald.service",
+        "systemd-tmpfiles/sysusers/catalog/binfmt/sysctl declared package maintenance"
+      ],
+      "evidence": "Actual original /var/lib/dpkg/info/systemd.postinst received read-only; exact new product maintainer scripts must also be received before admission."
+    }
+  },
+  "operatingReceiving": [
+    "Receive native dpkg successful status and all eleven actual new selected versions; unexpected exit remains unknown, never retry automatically.",
+    "Receive every captured manager's actual new executable/mapped source product and stable native identity, vendor reexec completion and all original loaded startup fences.",
+    "Receive no restart of unrelated application invocations; account separately for declared networkd/journald and naturally changing transient work.",
+    "Only after independent source/product/impact review and successful manager adoption: exact original frozen-empty fixture first, then original publisher invocation ad3e76830c914033972c70efc3e081ec may THAW and stop under durable startup fences. Receive zero PIDs/cgroup/job and actual terminal unit state.",
+    "Retire only the exact owned fixture and then use canonical held single-runtime publisher receiving. Do not start old publisher or replay queued/uncertain publications."
+  ],
+  "failure": {
+    "automaticRollback": false,
+    "automaticReplay": false,
+    "predecessorProducts": "Retain exact original official archives and native target facts; rollback requires fresh native effect receiving and explicit coherent original package selection.",
+    "unknownEffects": "Retain package-manager exit/journal, original frozen units, startup fences, publication inputs and original ledger claims until actual outcome receiving."
+  },
+  "status": "product-and-impact-review-pending-no-target-mutation"
+}
