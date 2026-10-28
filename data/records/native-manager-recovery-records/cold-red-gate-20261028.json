@@ -404,29 +404,6 @@
         "nativeRootServices": "MainPID=1154\nId=systemd-networkd.service\nLoadState=loaded\nActiveState=active\nSubState=running\nInvocationID=e5ee45137c1f4009b568fa8abaa6cae2\n\nMainPID=3642403\nId=systemd-journald.service\nLoadState=loaded\nActiveState=active\nSubState=running\nInvocationID=36055eb044fa4ab6a633b5dc04c98b59\n\nMainPID=573\nId=systemd-resolved.service\nLoadState=loaded\nActiveState=active\nSubState=running\nInvocationID=cc55517ef4c148fea25781318c9edef0\n\nMainPID=451\nId=systemd-timesyncd.service\nLoadState=loaded\nActiveState=active\nSubState=running\nInvocationID=ca6cc20f110b4df885f2606ce29f1faf\n\nMainPID=468\nId=systemd-udevd.service\nLoadState=loaded\nActiveState=active\nSubState=running\nInvocationID=5f72c6d3c11443a1b8fb6d7199390c8a\n",
         "nativeUserManagers": "[{\"unit\":\"user@1000.service\",\"load\":\"loaded\",\"active\":\"active\",\"sub\":\"running\",\"description\":\"User Manager for UID 1000\"},{\"unit\":\"user@1001.service\",\"load\":\"loaded\",\"active\":\"active\",\"sub\":\"running\",\"description\":\"User Manager for UID 1001\"}]\n"
       }
-    },
-    "operationParameters": {
-      "DEBIAN_FRONTEND": "noninteractive",
-      "NEEDRESTART_MODE": "l",
-      "aptArguments": [
-        "--no-download",
-        "--only-upgrade",
-        "--no-remove",
-        "--no-install-recommends",
-        "--assume-yes",
-        "install"
-      ],
-      "meaning": "Native APT/dpkg and all original maintainer hooks execute. The existing needrestart environment parameter selects scan/report-only for its optional unrelated-service restarts; no host configuration is modified."
-    },
-    "aptHooks": {
-      "receipt": "/home/emsenn/info/lib/emsenn/services/561-group/services/561-group-services-section/services/561-group-operations-services-section/services/cold-red-gate-services-section/data/records/native-manager-recovery-records/target-APT-hook-effect-receiving/received.json",
-      "needrestartEntryPoint": "/usr/lib/needrestart/apt-pinvoke -m u",
-      "automaticRestartDefaultObserved": true,
-      "needrestartSourceSha256": "dc891b77117a34f858d275707f2aec1c94cfb426fc10d5509994b3162fddcf1d",
-      "needrestartHookSha256": "6aa701a3d8766035b515a40cc06dda73434108fa0adfc1eb82f4adf1fa6c1f94",
-      "explicitRestartMode": "l",
-      "vendorMaintainerEffectsPreserved": true,
-      "hostConfigurationModified": false
     }
   },
   "operatingReceiving": [
@@ -442,7 +419,7 @@
     "predecessorProducts": "Retain exact original official archives and native target facts; rollback requires fresh native effect receiving and explicit coherent original package selection.",
     "unknownEffects": "Retain package-manager exit/journal, original frozen units, startup fences, publication inputs and original ledger claims until actual outcome receiving."
   },
-  "status": "native-controls-received-target-operation-not-admitted-or-performed",
+  "status": "native-controls-received-current-startup-fence-unreceived-no-target-operation",
   "receivedEvidence": {
     "nativeControls": {
       "path": "/home/emsenn/info/lib/emsenn/services/561-group/services/561-group-services-section/services/561-group-operations-services-section/services/cold-red-gate-services-section/data/records/native-manager-recovery-records/consumer-0c9a-native-qualified/received.json",
@@ -487,9 +464,21 @@
         }
       ],
       "targetMutation": false
+    },
+    "startupFenceRefusal": {
+      "path": "/home/emsenn/info/lib/emsenn/services/561-group/services/561-group-services-section/services/561-group-operations-services-section/services/cold-red-gate-services-section/data/records/native-manager-recovery-records/target-startup-fence-refusal-cfacd/received.json",
+      "observedAt": "2026-10-28T22:55:03.206Z",
+      "historical95Marker": "absent",
+      "historical96Marker": "absent",
+      "originalLagoonConditionMarker": "absent",
+      "effectiveCurrentStartupHoldReceived": false,
+      "originalTransactionPreserved": true,
+      "originalPublisherInvocation": "ad3e76830c914033972c70efc3e081ec",
+      "targetMutation": false
     }
   },
   "remainingReceiving": [
+    "Complete original CDE current startup-hold generation and native receiving from computer-deployment-engine@79c3d7b89dc057ff8bb736764fa86fc33e7ad1bd existing selected-auxiliary-runtime-supplier-transition requirement. Historical95/96 and old Lagoon Unit-condition markers are absent. Do not recreate them or manufacture historical custody. Actual independent manager-effect acceptance remains conditional on a newly received current strong startup fence and all fresh target boundaries.",
     "Independent review of the exact qualified source/product and declared eleven-package/all-manager effect family.",
     "Fresh original all-manager jobs boundary after credentials/market operations settle; do not cancel or stop them to manufacture quiescence.",
     "Re-read exact startup fence files and native APT simulation immediately before the declared original package operation.",
