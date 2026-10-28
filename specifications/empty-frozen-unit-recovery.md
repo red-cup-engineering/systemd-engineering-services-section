@@ -27,3 +27,5 @@ https://github.com/systemd/systemd/blob/v257/src/core/unit-serialize.c
 https://github.com/systemd/systemd/blob/v257/src/core/service.c
 https://github.com/systemd/systemd/issues/38517
 https://github.com/systemd/systemd/issues/37569
+
+The factory uses the existing public-repository ubuntu-24.04 runner contract (dedicated VM,4CPU,16GBRAM,14GBSSD) and receives its actual native capacity before each growing stage. EightGiB peak plus twoGiB growth are estimates, charged against both observed guest headroom and the declared provider allocation; no deletion of unrelated runner data is admitted. The provider contract is https://docs.github.com/en/actions/reference/runners/github-hosted-runners. Its actual run/job/image identities and native observations remain in the product. This is a slot observation, not a reservation against other writers.

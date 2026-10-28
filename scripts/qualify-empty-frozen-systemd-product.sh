@@ -29,13 +29,25 @@ admit(){
   python3 - "$out" "$1" <<'PY'
 import json,os,pathlib,sys
 path,stage=sys.argv[1:]
+assert os.environ.get("GITHUB_ACTIONS")=="true"
+assert os.environ.get("RUNNER_ENVIRONMENT")=="github-hosted"
+assert os.environ.get("RUNNER_OS")=="Linux" and os.environ.get("RUNNER_ARCH")=="X64"
+assert os.environ.get("GITHUB_REPOSITORY")=="red-cup-engineering/systemd-engineering-services-section"
 v=os.statvfs(path)
 available=v.f_bavail*v.f_frsize
+initial=pathlib.Path(path,"initial-capacity.json")
+if not initial.exists():
+    initial.write_text(json.dumps({"availableBytes":available,"providerContractStorageBytes":14000000000,"providerContractMemoryBytes":16000000000,"runId":os.environ["GITHUB_RUN_ID"],"job":os.environ["GITHUB_JOB"],"imageOS":os.environ.get("ImageOS"),"imageVersion":os.environ.get("ImageVersion"),"contract":"https://docs.github.com/en/actions/reference/runners/github-hosted-runners"})+"\n")
+start=json.loads(initial.read_text())
+remaining=start["providerContractStorageBytes"]-max(0,start["availableBytes"]-available)
 peak=8*1024**3
 growth=2*1024**3
 reserve=(v.f_blocks*v.f_frsize*3+99)//100
 required=peak+growth+reserve
-row={"kind":"systemd-package-factory-capacity/v1","stage":stage,"guestAvailableBytes":available,"guestTotalBytes":v.f_blocks*v.f_frsize,"peakBytesEstimate":peak,"growthBytes":growth,"reserveBytes":reserve,"freeInodes":v.f_favail,"requiredInodes":500000,"provider":"dedicated GitHub-hosted Ubuntu job; no tenant-host fabrication","admitted":available>=required and v.f_favail>=500000}
+contract_reserve=(start["providerContractStorageBytes"]*3+99)//100
+memory={line.split(":")[0]:int(line.split()[1])*1024 for line in pathlib.Path("/proc/meminfo").read_text().splitlines() if line.startswith(("MemTotal:","MemAvailable:"))}
+memory_required=7*1024**3
+row={"providerContractRemainingBytes":remaining,"contractReserveBytes":contract_reserve,"memory":memory,"memoryRequiredBytesEstimate":memory_required,"kind":"systemd-package-factory-capacity/v1","stage":stage,"guestAvailableBytes":available,"guestTotalBytes":v.f_blocks*v.f_frsize,"peakBytesEstimate":peak,"growthBytes":growth,"reserveBytes":reserve,"freeInodes":v.f_favail,"requiredInodes":500000,"provider":"dedicated GitHub-hosted Ubuntu job; no tenant-host fabrication","admitted":available>=required and remaining>=peak+growth+contract_reserve and v.f_favail>=500000 and memory["MemAvailable"]>=memory_required}
 pathlib.Path(path,"capacity-"+stage+".json").write_text(json.dumps(row,sort_keys=True)+"\n")
 assert row["admitted"], "original factory capacity refused"
 PY
