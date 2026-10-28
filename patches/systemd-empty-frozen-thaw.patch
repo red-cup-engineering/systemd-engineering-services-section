@@ -1,14 +1,21 @@
 --- a/src/core/unit.c
 +++ b/src/core/unit.c
-@@ -6365,7 +6365,10 @@ int unit_freezer_action(Unit *u, FreezerAction action) {
+@@ -6374,8 +6374,16 @@ int unit_freezer_action(Unit *u, FreezerAction action) {
+                 return -EHOSTDOWN;
  
          s = unit_active_state(u);
 -        if (s != UNIT_ACTIVE)
-+        if (s != UNIT_ACTIVE &&
-+            !(action == FREEZER_THAW &&
-+              u->freezer_state == FREEZER_FROZEN &&
-+              unit_cgroup_is_empty(u) > 0))
-                 return -EHOSTDOWN;
+-                return -EHOSTDOWN;
++        if (s != UNIT_ACTIVE) {
++                CGroupRuntime *crt = unit_get_cgroup_runtime(u);
++
++                /* Pruning releases the path only after receiving an empty cgroup.
++                 * No realized cgroup has nothing left to thaw; unreadable or
++                 * populated realized cgroups must still refuse this transition. */
++                if (action != FREEZER_THAW || u->freezer_state != FREEZER_FROZEN ||
++                    (crt && crt->cgroup_path && unit_cgroup_is_empty(u) <= 0))
++                        return -EHOSTDOWN;
++        }
  
          if (action == FREEZER_FREEZE && IN_SET(u->freezer_state, FREEZER_FREEZING, FREEZER_FREEZING_BY_PARENT))
                  return -EALREADY;
