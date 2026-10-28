@@ -84,6 +84,7 @@ if len(sys.argv)>2:
  assert sys.argv[2]=='descendant'
  if os.fork()==0:
   os.setsid()
+  signal.signal(signal.SIGTERM, signal.SIG_IGN)
   ready('CHILD')
   signal.pause()
   os._exit(0)
@@ -178,7 +179,7 @@ signal.pause()
         assert (root / "count").read_text() == "1"
         if original_group.exists():
             assert "populated 0" in (original_group / "cgroup.events").read_text().splitlines()
-        report.update({"stopped": stopped, "mainInvocations": 1, "verdict": "corrected-native-thaw-received"})
+        report.update({"stopped": stopped, "mainInvocations": 1, "emptyBoundary": "corrected-empty-native-thaw-received"})
         # Main loss while a controlled frozen descendant remains creates a
         # non-active populated unit without any artificial clock. THAW must
         # refuse it until both original pidfds report actual process exit.
@@ -232,12 +233,15 @@ signal.pause()
         second_frozen = observe()
         assert second_frozen["InvocationID"] == second["InvocationID"]
         assert second_frozen["FreezerState"] == "frozen"
+        report["populatedSetup"] = {"original": second, "roles": roles, "frozen": second_frozen}
         signal.pidfd_send_signal(second_pidfd, signal.SIGKILL)
         select.select([second_pidfd], [], [])
         deactivating = wait_native(lambda state: state["ActiveState"] == "deactivating"
                                    and state["FreezerState"] == "frozen" and state["MainPID"] == "0")
         assert deactivating["InvocationID"] == second["InvocationID"]
-        assert not select.select([child_pidfd], [], [], 0)[0]
+        report["populatedSetup"].update({"deactivating": deactivating,
+                                        "childExitedBeforeRefusal": bool(select.select([child_pidfd], [], [], 0)[0])})
+        assert not report["populatedSetup"]["childExitedBeforeRefusal"]
         second_group = pathlib.Path("/sys/fs/cgroup" + second["ControlGroup"])
         populated = (second_group / "cgroup.events").read_text()
         assert "populated 1" in populated.splitlines()
@@ -272,6 +276,7 @@ signal.pause()
                                      "events": populated, "thawRefused": {"code": refused.returncode, "stderr": refused.stderr},
                                      "empty": second_empty, "terminal": second_terminal,
                                      "inactiveFreezeRefused": inactive_freeze.returncode, "mainInvocationsTotal": 2}
+        report["verdict"] = "corrected-native-thaw-received"
 except BaseException as error:
     report["failure"] = {"type": type(error).__name__, "message": str(error)}
     try:

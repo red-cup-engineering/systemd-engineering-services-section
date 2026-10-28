@@ -59,8 +59,20 @@
       "commit": "d9b42c614feb2339d5f5fab5c231fee08d081b31",
       "run": 40766143508,
       "sourceIntent": "data/records/native-manager-repair-records/emptythaw2.json",
-      "qualification": "pending-full-vendor-and-unchanged-native-controls",
-      "retainedProductRecord": null
+      "qualification": "full-vendor-and-original-native-controls-received",
+      "retainedProductRecord": "data/records/native-manager-product-records/d9b42c614feb.json",
+      "nativeConsumer": {
+        "commit": "0c9ac68e26041b48dd4f4ae98d5ea10db48f8b5c",
+        "run": 40772797684,
+        "artifactId": 12853276987,
+        "artifactBytes": 81276888,
+        "artifactSha256": "b90611f658fd8d628aa169a7ece707ea8ac6eb5db143e93ea6e684cd49386b90",
+        "nativeVerdict": "corrected-native-thaw-received",
+        "baselineVerdict": "original-defect-reproduced",
+        "populatedThawRefused": true,
+        "inactiveFreezeRefused": true,
+        "productionEffects": false
+      }
     },
     "packages": [
       {
@@ -156,8 +168,8 @@
       "newCorrection": {
         "version": "257.9-0ubuntu2.5+rce.emptythaw2",
         "producerCommit": "d9b42c614feb2339d5f5fab5c231fee08d081b31",
-        "product": null,
-        "receiving": "Pending exact new source product and complete native qualification; no fallback to rejected correction."
+        "product": "/gnu/store/rgphpms9ba6h2r5l1mrfr4mdmccqrmqd-systemd-manager-product-d9b42c614feb",
+        "receiving": "Original d9b product manifest, every package byte and complete vendor test record received unchanged. Native consumer0c9a independently reproduced baseline, empty positive, populated negative, subsequent empty THAW/stop and inactive FREEZE refusal. No recompilation, fallback or product relabeling."
       }
     }
   },
@@ -407,5 +419,57 @@
     "predecessorProducts": "Retain exact original official archives and native target facts; rollback requires fresh native effect receiving and explicit coherent original package selection.",
     "unknownEffects": "Retain package-manager exit/journal, original frozen units, startup fences, publication inputs and original ledger claims until actual outcome receiving."
   },
-  "status": "emptythaw2-original-factory-running-no-target-mutation"
+  "status": "native-controls-received-target-operation-not-admitted-or-performed",
+  "receivedEvidence": {
+    "nativeControls": {
+      "path": "/home/emsenn/info/lib/emsenn/services/561-group/services/561-group-services-section/services/561-group-operations-services-section/services/cold-red-gate-services-section/data/records/native-manager-recovery-records/consumer-0c9a-native-qualified/received.json",
+      "sha256": "c5a2b2b213ee20f9b90f447014ca15906b0af3a7533695aa49d1baa8f04e1331",
+      "archiveRetired": true,
+      "duplicateProductRetained": false
+    },
+    "targetPackageClosure": "/home/emsenn/info/lib/emsenn/services/561-group/services/561-group-services-section/services/561-group-operations-services-section/services/cold-red-gate-services-section/data/records/native-manager-recovery-records/target-package-closure-d9b-v2/closure.received.json",
+    "targetELFClosure": "/home/emsenn/info/lib/emsenn/services/561-group/services/561-group-services-section/services/561-group-operations-services-section/services/cold-red-gate-services-section/data/records/native-manager-recovery-records/target-elf-closure-d9b/ELF.received.json",
+    "upstreamServiceObservation": "/home/emsenn/info/lib/emsenn/services/561-group/services/561-group-services-section/services/561-group-operations-services-section/services/cold-red-gate-services-section/data/records/native-manager-recovery-records/consumer-0c9a-native-qualified-service-observation/received.json",
+    "targetBefore": {
+      "path": "/home/emsenn/info/lib/emsenn/services/561-group/services/561-group-services-section/services/561-group-operations-services-section/services/cold-red-gate-services-section/data/records/native-manager-recovery-records/target-before-qualified-0c9a/before.json",
+      "observedAt": "2026-10-28T22:43:35Z",
+      "managerPIDs": [
+        1,
+        1313,
+        1314
+      ],
+      "originalBirthsUnchanged": true,
+      "originalExecutableSha256": "b1997f7c54ccece6ad4dbe213c04780e8c103e60c0b70ed62601fac29588e73c",
+      "allElevenPredecessorVersionsUnchanged": true,
+      "originalPublisherInvocation": "ad3e76830c914033972c70efc3e081ec",
+      "publisherMainPID": 0,
+      "publisherControlPID": 0,
+      "publisherJob": "",
+      "publisherControlGroup": "",
+      "publisherFreezerState": "frozen",
+      "systemJobsEmpty": true,
+      "user1000JobsEmpty": true,
+      "user1001Jobs": [
+        {
+          "id": 12591577,
+          "unit": "561-group-credentials.service",
+          "type": "start",
+          "state": "running"
+        },
+        {
+          "id": 12591576,
+          "unit": "market-561-group-node.service",
+          "type": "start",
+          "state": "waiting"
+        }
+      ],
+      "targetMutation": false
+    }
+  },
+  "remainingReceiving": [
+    "Independent review of the exact qualified source/product and declared eleven-package/all-manager effect family.",
+    "Fresh original all-manager jobs boundary after credentials/market operations settle; do not cancel or stop them to manufacture quiescence.",
+    "Re-read exact startup fence files and native APT simulation immediately before the declared original package operation.",
+    "Receive exact installed packages, every manager's mapped executable/core/shared identities and unchanged unrelated application invocations; only then THAW/stop the exact owned fixture and held original publisher."
+  ]
 }
