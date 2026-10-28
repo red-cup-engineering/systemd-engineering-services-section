@@ -24,6 +24,11 @@ report = {"controllerSha256": hashlib.sha256(pathlib.Path(__file__).read_bytes()
           "cgroupNamespace": os.readlink("/proc/self/ns/cgroup"),
           "managerCgroupNamespace": os.readlink("/proc/1/ns/cgroup")}
 assert report["cgroupNamespace"] == report["managerCgroupNamespace"]
+report["managerFiles"] = [{"path": name, "bytes": pathlib.Path(name).stat().st_size,
+                           "sha256": hashlib.sha256(pathlib.Path(name).read_bytes()).hexdigest()}
+                          for name in ("/proc/1/exe",
+                              "/usr/lib/x86_64-linux-gnu/systemd/libsystemd-core-257.so",
+                              "/usr/lib/x86_64-linux-gnu/systemd/libsystemd-shared-257.so")]
 
 def run(*args, check=True):
     return subprocess.run(args, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=check)
@@ -267,8 +272,16 @@ signal.pause()
                                      "events": populated, "thawRefused": {"code": refused.returncode, "stderr": refused.stderr},
                                      "empty": second_empty, "terminal": second_terminal,
                                      "inactiveFreezeRefused": inactive_freeze.returncode, "mainInvocationsTotal": 2}
-    print(json.dumps(report, sort_keys=True))
+except BaseException as error:
+    report["failure"] = {"type": type(error).__name__, "message": str(error)}
+    try:
+        report["stateAtFailure"] = observe()
+    except Exception as observation:
+        report["stateAtFailureRefused"] = {"type": type(observation).__name__, "message": str(observation)}
+    raise
 finally:
+    # A failed assertion must retain the original native state and refusal too.
+    print(json.dumps(report, sort_keys=True), flush=True)
     if pidfd is not None:
         os.close(pidfd)
     monitor.terminate()
