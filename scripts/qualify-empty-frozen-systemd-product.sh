@@ -20,6 +20,7 @@ cleanup(){
     if test "$current" = "$commit"; then
       docker inspect "$cid" > "$out/container-$cid-before-retirement.json"
       docker logs "$cid" > "$out/$mode-container.stdout" 2> "$out/$mode-container.stderr" || true
+      docker exec "$cid" journalctl --no-pager --output=json > "$out/$mode-journal.jsonl" 2> "$out/$mode-journal.stderr" || true
       python3 "$repo/scripts/retire-owned-native-container.py" "$cid" "$commit" "$out"
     else
       printf '%s\n' "Original container ownership changed; retained $cid" >&2
@@ -226,7 +227,6 @@ PY
   readiness=$(docker exec "$cid" systemctl is-system-running --wait || true)
   case "$readiness" in (running|degraded) ;; (*) printf '%s\n' "$readiness"; exit 1;; esac
   docker exec "$cid" python3 /opt/rce/qualify-empty-frozen-thaw.py "$mode" > "$out/$mode-native-receiving.json"
-  docker exec "$cid" journalctl --no-pager --output=json > "$out/$mode-journal.jsonl"
 done
 python3 - "$out" <<'PY'
 import hashlib,json,pathlib,sys,os
