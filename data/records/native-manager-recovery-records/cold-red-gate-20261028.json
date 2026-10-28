@@ -404,6 +404,29 @@
         "nativeRootServices": "MainPID=1154\nId=systemd-networkd.service\nLoadState=loaded\nActiveState=active\nSubState=running\nInvocationID=e5ee45137c1f4009b568fa8abaa6cae2\n\nMainPID=3642403\nId=systemd-journald.service\nLoadState=loaded\nActiveState=active\nSubState=running\nInvocationID=36055eb044fa4ab6a633b5dc04c98b59\n\nMainPID=573\nId=systemd-resolved.service\nLoadState=loaded\nActiveState=active\nSubState=running\nInvocationID=cc55517ef4c148fea25781318c9edef0\n\nMainPID=451\nId=systemd-timesyncd.service\nLoadState=loaded\nActiveState=active\nSubState=running\nInvocationID=ca6cc20f110b4df885f2606ce29f1faf\n\nMainPID=468\nId=systemd-udevd.service\nLoadState=loaded\nActiveState=active\nSubState=running\nInvocationID=5f72c6d3c11443a1b8fb6d7199390c8a\n",
         "nativeUserManagers": "[{\"unit\":\"user@1000.service\",\"load\":\"loaded\",\"active\":\"active\",\"sub\":\"running\",\"description\":\"User Manager for UID 1000\"},{\"unit\":\"user@1001.service\",\"load\":\"loaded\",\"active\":\"active\",\"sub\":\"running\",\"description\":\"User Manager for UID 1001\"}]\n"
       }
+    },
+    "operationParameters": {
+      "DEBIAN_FRONTEND": "noninteractive",
+      "NEEDRESTART_MODE": "l",
+      "aptArguments": [
+        "--no-download",
+        "--only-upgrade",
+        "--no-remove",
+        "--no-install-recommends",
+        "--assume-yes",
+        "install"
+      ],
+      "meaning": "Native APT/dpkg and all original maintainer hooks execute. The existing needrestart environment parameter selects scan/report-only for its optional unrelated-service restarts; no host configuration is modified."
+    },
+    "aptHooks": {
+      "receipt": "/home/emsenn/info/lib/emsenn/services/561-group/services/561-group-services-section/services/561-group-operations-services-section/services/cold-red-gate-services-section/data/records/native-manager-recovery-records/target-APT-hook-effect-receiving/received.json",
+      "needrestartEntryPoint": "/usr/lib/needrestart/apt-pinvoke -m u",
+      "automaticRestartDefaultObserved": true,
+      "needrestartSourceSha256": "dc891b77117a34f858d275707f2aec1c94cfb426fc10d5509994b3162fddcf1d",
+      "needrestartHookSha256": "6aa701a3d8766035b515a40cc06dda73434108fa0adfc1eb82f4adf1fa6c1f94",
+      "explicitRestartMode": "l",
+      "vendorMaintainerEffectsPreserved": true,
+      "hostConfigurationModified": false
     }
   },
   "operatingReceiving": [
