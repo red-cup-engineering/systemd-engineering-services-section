@@ -65,11 +65,26 @@ try:
     listener.bind(str(root / "payload.ready"))
     listener.listen(1)
     main = root / "main.py"
-    main.write_text("import os,pathlib,signal,socket,sys\np=pathlib.Path(sys.argv[1])\n"
-                    "n=int(p.read_text()) if p.exists() else 0\n"
-                    "assert 0<=n<3\np.write_text(str(n+1))\n"
-                    "s=socket.socket(socket.AF_UNIX,socket.SOCK_STREAM)\n"
-                    "s.connect(str(p.parent/\'payload.ready\'))\ns.sendall(b\'READY\\n\')\ns.close()\nsignal.pause()\n")
+    main.write_text("""import os,pathlib,signal,socket,sys
+p=pathlib.Path(sys.argv[1])
+n=int(p.read_text()) if p.exists() else 0
+assert 0<=n<3
+p.write_text(str(n+1))
+def ready(role):
+ s=socket.socket(socket.AF_UNIX,socket.SOCK_STREAM)
+ s.connect(str(p.parent/'payload.ready'))
+ s.sendall((role+' '+str(os.getpid())+'\\n').encode())
+ s.close()
+if len(sys.argv)>2:
+ assert sys.argv[2]=='descendant'
+ if os.fork()==0:
+  os.setsid()
+  ready('CHILD')
+  signal.pause()
+  os._exit(0)
+ready('MAIN')
+signal.pause()
+""")
     os.chmod(main, 0o600)
     report["payloadSha256"] = hashlib.sha256(main.read_bytes()).hexdigest()
     original = ("[Unit]\nDescription=Owned empty-frozen manager qualification\n[Service]\nType=exec\n"
@@ -96,9 +111,10 @@ try:
         piece = connection.recv(128)
         assert piece and len(payload_ready) + len(piece) <= 128
         payload_ready += piece
-    assert payload_ready == b"READY\n"
+    assert payload_ready == ("MAIN " + str(pid) + "\n").encode()
     connection.close()
     listener.close()
+    (root / "payload.ready").unlink()
     group = live["ControlGroup"]
     assert group.startswith("/") and ".." not in group.split("/")
     run("systemctl", "freeze", unit)
@@ -158,6 +174,99 @@ try:
         if original_group.exists():
             assert "populated 0" in (original_group / "cgroup.events").read_text().splitlines()
         report.update({"stopped": stopped, "mainInvocations": 1, "verdict": "corrected-native-thaw-received"})
+        # Main loss while a controlled frozen descendant remains creates a
+        # non-active populated unit without any artificial clock. THAW must
+        # refuse it until both original pidfds report actual process exit.
+        marker.unlink()
+        listener = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        listener.bind(str(root / "payload.ready"))
+        listener.listen(2)
+        with_descendant = revised.replace(str(root / "count") + "\n",
+                                          str(root / "count") + " descendant\n")
+        next_path.write_text(with_descendant)
+        os.chmod(next_path, 0o600)
+        os.replace(next_path, path)
+        run("systemctl", "daemon-reload")
+        run("systemctl", "start", unit)
+        second = wait_native(lambda state: int(state["MainPID"]) > 0 and state["SubState"] == "running")
+        second_pid = int(second["MainPID"])
+        second_pidfd = os.pidfd_open(second_pid)
+        child_pidfd = None
+        roles = {}
+        while len(roles) < 2:
+            readable, _, _ = select.select([listener, second_pidfd, monitor_pidfd], [], [])
+            assert listener in readable
+            connection, _ = listener.accept()
+            peer = struct.unpack("3i", connection.getsockopt(socket.SOL_SOCKET, socket.SO_PEERCRED, struct.calcsize("3i")))
+            ready_bytes = b""
+            while b"\n" not in ready_bytes:
+                piece = connection.recv(128)
+                assert piece and len(ready_bytes) + len(piece) <= 128
+                ready_bytes += piece
+            role, peer_pid = ready_bytes.decode().strip().split(" ")
+            peer_pid = int(peer_pid)
+            assert role in ("MAIN", "CHILD") and role not in roles
+            assert peer == (peer_pid, os.getuid(), os.getgid())
+            if role == "MAIN":
+                assert peer_pid == second_pid
+            else:
+                child_pidfd = os.pidfd_open(peer_pid)
+                status = pathlib.Path("/proc", str(peer_pid), "status").read_text().splitlines()
+                assert int([line.split()[1] for line in status if line.startswith("PPid:")][0]) == second_pid
+                group_text = pathlib.Path("/proc", str(peer_pid), "cgroup").read_text().splitlines()
+                assert "0::" + second["ControlGroup"] in group_text
+            roles[role] = peer_pid
+            connection.close()
+        listener.close()
+        (root / "payload.ready").unlink()
+        assert child_pidfd is not None
+        second_argv = pathlib.Path("/proc", str(second_pid), "cmdline").read_bytes().split(b"\0")[:-1]
+        assert second_argv == argv + [b"descendant"]
+        assert (root / "count").read_text() == "2"
+        run("systemctl", "freeze", unit)
+        second_frozen = observe()
+        assert second_frozen["InvocationID"] == second["InvocationID"]
+        assert second_frozen["FreezerState"] == "frozen"
+        signal.pidfd_send_signal(second_pidfd, signal.SIGKILL)
+        select.select([second_pidfd], [], [])
+        deactivating = wait_native(lambda state: state["ActiveState"] == "deactivating"
+                                   and state["FreezerState"] == "frozen" and state["MainPID"] == "0")
+        assert deactivating["InvocationID"] == second["InvocationID"]
+        assert not select.select([child_pidfd], [], [], 0)[0]
+        second_group = pathlib.Path("/sys/fs/cgroup" + second["ControlGroup"])
+        populated = (second_group / "cgroup.events").read_text()
+        assert "populated 1" in populated.splitlines()
+        refused = run("systemctl", "thaw", unit, check=False)
+        assert refused.returncode != 0
+        assert observe()["FreezerState"] == "frozen"
+        assert not select.select([child_pidfd], [], [], 0)[0]
+        signal.pidfd_send_signal(child_pidfd, signal.SIGKILL)
+        select.select([child_pidfd], [], [])
+        second_empty = wait_native(lambda state: state["MainPID"] == "0" and state["ControlPID"] == "0"
+                                  and state["FreezerState"] == "frozen"
+                                  and state["SubState"] in ("auto-restart", "auto-restart-queued"))
+        assert second_empty["InvocationID"] == second["InvocationID"]
+        if second_group.exists():
+            assert "populated 0" in (second_group / "cgroup.events").read_text().splitlines()
+        with marker.open("x") as output:
+            output.write("publisher runtime transition pending\n")
+            output.flush()
+            os.fsync(output.fileno())
+        run("systemctl", "thaw", unit)
+        run("systemctl", "stop", unit)
+        second_terminal = wait_native(lambda state: state["MainPID"] == "0" and state["ControlPID"] == "0"
+                                     and state["ActiveState"] in ("inactive", "failed")
+                                     and state["SubState"] in ("dead", "failed") and state["Job"] == "")
+        assert second_terminal["FreezerState"] == "running"
+        assert (root / "count").read_text() == "2"
+        inactive_freeze = run("systemctl", "freeze", unit, check=False)
+        assert inactive_freeze.returncode != 0
+        os.close(second_pidfd)
+        os.close(child_pidfd)
+        report["populatedBoundary"] = {"original": second, "roles": roles, "deactivating": deactivating,
+                                     "events": populated, "thawRefused": {"code": refused.returncode, "stderr": refused.stderr},
+                                     "empty": second_empty, "terminal": second_terminal,
+                                     "inactiveFreezeRefused": inactive_freeze.returncode, "mainInvocationsTotal": 2}
     print(json.dumps(report, sort_keys=True))
 finally:
     if pidfd is not None:

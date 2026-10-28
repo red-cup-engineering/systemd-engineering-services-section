@@ -18,6 +18,9 @@ cleanup(){
     if test "$current" = "$commit"; then
       docker inspect "$cid" > "$out/container-$cid-before-retirement.json"
       python3 "$repo/scripts/retire-owned-native-container.py" "$cid" "$commit" "$out"
+    else
+      printf '%s\n' "Original container ownership changed; retained $cid" >&2
+      return 1
     fi
   done
 }
@@ -73,6 +76,9 @@ patched=json.loads((root/"patched-native-receiving.json").read_text())
 assert baseline["verdict"]=="original-defect-reproduced"
 assert patched["verdict"]=="corrected-native-thaw-received"
 assert patched["mainInvocations"]==1
+assert patched["populatedBoundary"]["thawRefused"]["code"]!=0
+assert patched["populatedBoundary"]["inactiveFreezeRefused"]!=0
+assert patched["populatedBoundary"]["mainInvocationsTotal"]==2
 files=[]
 for p in sorted(root.iterdir()):
     if p.is_file():
