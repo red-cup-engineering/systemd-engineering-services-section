@@ -1,8 +1,15 @@
 name: Qualify original empty frozen manager repair
 on:
   workflow_dispatch:
+    inputs:
+      retained_product_record:
+        description: Exact source-owned retained product record key; empty constructs a new product
+        required: false
+        type: string
+        default: ""
 permissions:
   contents: read
+  actions: read
 jobs:
   original-native-manager:
     runs-on: ubuntu-24.04
@@ -15,6 +22,8 @@ jobs:
         env:
           OWNER_COMMIT: ${{ github.sha }}
           SOURCE_DATE_EPOCH: "1793145600"
+          RETAINED_PRODUCT_RECORD: ${{ inputs.retained_product_record }}
+          RETAINED_PRODUCT_TOKEN: ${{ github.token }}
         run: bash scripts/qualify-empty-frozen-systemd-product.sh "$RUNNER_TEMP/systemd-empty-thaw"
       - name: Retain exact source, package and native receiving product
         if: always()

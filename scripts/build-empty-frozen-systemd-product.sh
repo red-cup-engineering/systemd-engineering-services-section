@@ -53,7 +53,7 @@ p=Path("debian/changelog")
 head=("systemd (257.9-0ubuntu2.5+rce.emptythaw1) questing; urgency=medium\n\n"
       "  * Receive explicit thaw of an empty, non-active, cached-frozen unit.\n"
       "    Original registry migration Work599; no automatic version allocation.\n\n"
-      " -- emsenn <emsenn@emsenn.net>  "+email.utils.formatdate(int(os.environ["SOURCE_DATE_EPOCH"]),usegmt=True)+"\n\n")
+      " -- emsenn <emsenn@emsenn.net>  "+email.utils.formatdate(int(os.environ["SOURCE_DATE_EPOCH"]),usegmt=False)+"\n\n")
 p.write_text(head+p.read_text())
 PY
 dpkg-buildpackage --build=binary --no-sign -j2
