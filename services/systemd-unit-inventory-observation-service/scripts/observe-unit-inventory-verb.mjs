@@ -14,7 +14,7 @@
 
 import { observeUnitInventory } from "../src/observe-unit-inventory.mjs";
 import { runSystemctl } from "../src/run-systemctl.mjs";
-import { REFUSAL_SCHEMA } from "@red-cup-engineering/computer-system-engine/verb-refusal-schema";
+import { REFUSAL_SCHEMA } from "@red-cup-engineering/computer-engine/verb-refusal-schema";
 
 function observeUnitInventoryVerb({ host }) {
   return observeUnitInventory(host ?? "local", { run: runSystemctl });
