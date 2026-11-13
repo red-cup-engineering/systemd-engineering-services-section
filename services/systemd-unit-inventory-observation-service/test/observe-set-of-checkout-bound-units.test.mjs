@@ -43,7 +43,7 @@ const SHOW_OUTPUTS = {
   "verdaccio.service": [
     "FragmentPath=/home/emsenn/.config/systemd/user/verdaccio.service",
     "ExecStart={ path=/usr/bin/verdaccio ; argv[]=/usr/bin/verdaccio ; ignore_errors=no ; start_time=[not set] ; stop_time=[not set] ; pid=0 ; code=(null) ; status=0/0 }",
-    "WorkingDirectory=/home/emsenn/info/lib/verdaccio-services-section",
+    "WorkingDirectory=/home/emsenn/info/lib/verdaccio-engineering-services-section",
     "ActiveState=active",
     "SubState=running",
   ].join("\n") + "\n",
