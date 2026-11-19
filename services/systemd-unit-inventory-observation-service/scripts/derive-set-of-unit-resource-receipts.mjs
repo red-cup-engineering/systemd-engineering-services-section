@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { readFileSync } from "node:fs";
 import { argument as option } from "@red-cup-engineering/parse-javascript-argv-service";
-import { deriveSetOfUnitResourceReceipts } from "../src/derive-unit-resource-receipts.mjs";
+import { deriveSetOfUnitResourceRecords } from "../src/derive-unit-resource-receipts.mjs";
 
 function readObservations(path) {
   const parsed = JSON.parse(readFileSync(path, "utf8"));
@@ -21,7 +21,7 @@ if (!beforePath || !afterPath) {
 try {
   const before = readObservations(beforePath);
   const after = readObservations(afterPath);
-  process.stdout.write(`${JSON.stringify(deriveSetOfUnitResourceReceipts(before, after), null, 2)}\n`);
+  process.stdout.write(`${JSON.stringify(deriveSetOfUnitResourceRecords(before, after), null, 2)}\n`);
 } catch (error) {
   process.stderr.write(`${error.message}\n`);
   process.exit(1);
