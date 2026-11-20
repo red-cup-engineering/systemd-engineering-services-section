@@ -30,7 +30,7 @@ function observationReference(observation) {
   return Object.freeze({ host: observation.host, unit: observation.unit, observedAt: observation.observedAt });
 }
 
-function makeRecord({ host, unit, before, after, asset, denominatorUnit, numerator, denominator }) {
+function makeReceipt({ host, unit, before, after, asset, denominatorUnit, numerator, denominator }) {
   return Object.freeze({
     type: "bare-cedar-fog.resource-metering/unit-resource-consumed",
     version: 1,
@@ -53,7 +53,7 @@ function makeRecord({ host, unit, before, after, asset, denominatorUnit, numerat
 // interval. Skipped (returns null) when either side is unknown, the
 // incarnation changed, or the counter appears to have gone backwards within
 // one incarnation (a contract violation this die refuses to paper over).
-function counterDeltaRecord({ host, unit, before, after, propertyName, asset, denominatorUnit, denominator }) {
+function counterDeltaReceipt({ host, unit, before, after, propertyName, asset, denominatorUnit, denominator }) {
   if (!sameIncarnation(before, after)) return null;
   const beforeProperty = before.properties[propertyName];
   const afterProperty = after.properties[propertyName];
@@ -69,17 +69,17 @@ function counterDeltaRecord({ host, unit, before, after, propertyName, asset, de
       `derive-unit-resource-receipts: ${propertyName} went backwards for ${host}/${unit} within one incarnation (${beforeProperty.value} -> ${afterProperty.value})`,
     );
   }
-  return makeRecord({ host, unit, before, after, asset, denominatorUnit, numerator: afterValue - beforeValue, denominator });
+  return makeReceipt({ host, unit, before, after, asset, denominatorUnit, numerator: afterValue - beforeValue, denominator });
 }
 
 // MemoryPeak is a high-water mark, not a flow: differencing two peaks is not
 // "memory consumed in the interval". The receipt instead states the peak
 // known as of the later observation -- a snapshot, honestly labeled by its
 // intervalEnd rather than implying a rate.
-function memoryPeakRecord({ host, unit, before, after }) {
+function memoryPeakReceipt({ host, unit, before, after }) {
   const afterProperty = after.properties.MemoryPeak;
   if (!afterProperty.known) return null;
-  return makeRecord({
+  return makeReceipt({
     host,
     unit,
     before,
@@ -101,17 +101,17 @@ function memoryPeakRecord({ host, unit, before, after }) {
  * @returns {object[]} receipts shaped {type, version, host, unit, provider, actor, intervalStart, intervalEnd, derivedFrom, price: {denomination: {kind, asset, unit}, amount: {numerator, denominator}}}.
  * @throws {Error} when host/unit disagree between before and after, or a cumulative counter runs backwards within one incarnation.
  */
-export function deriveUnitResourceRecords(before, after) {
+export function deriveUnitResourceReceipts(before, after) {
   requireSameUnit(before, after);
   const { host, unit } = before;
-  const records = [];
-  const cpu = counterDeltaRecord({
+  const receipts = [];
+  const cpu = counterDeltaReceipt({
     host, unit, before, after,
     propertyName: "CPUUsageNSec", asset: "cpu-seconds", denominatorUnit: "second", denominator: 1_000_000_000n,
   });
-  if (cpu) records.push(cpu);
-  const memoryPeak = memoryPeakRecord({ host, unit, before, after });
-  if (memoryPeak) records.push(memoryPeak);
+  if (cpu) receipts.push(cpu);
+  const memoryPeak = memoryPeakReceipt({ host, unit, before, after });
+  if (memoryPeak) receipts.push(memoryPeak);
   // The Linux/systemd property vocabulary belongs here; all four measures
   // use one exact cumulative-byte delta law rather than four bespoke folds.
   const byteCounters = [
@@ -121,11 +121,11 @@ export function deriveUnitResourceRecords(before, after) {
     ["IOWriteBytes", "disk-write-bytes"],
   ];
   for (const [propertyName, asset] of byteCounters) {
-    const record = counterDeltaRecord({ host, unit, before, after,
+    const receipt = counterDeltaReceipt({ host, unit, before, after,
       propertyName, asset, denominatorUnit: "byte", denominator: 1n });
-    if (record) records.push(record);
+    if (receipt) receipts.push(receipt);
   }
-  return records;
+  return receipts;
 }
 
 /**
@@ -152,14 +152,14 @@ function uniqueUnitObservations(observations) {
   return keyed;
 }
 
-export function deriveSetOfUnitResourceRecords(observationsBefore, observationsAfter) {
+export function deriveSetOfUnitResourceReceipts(observationsBefore, observationsAfter) {
   const beforeByKey = uniqueUnitObservations(observationsBefore);
   const afterByKey = uniqueUnitObservations(observationsAfter);
-  const records = [];
+  const receipts = [];
   for (const [key, before] of beforeByKey) {
     const after = afterByKey.get(key);
     if (after === undefined) continue;
-    records.push(...deriveUnitResourceRecords(before, after));
+    receipts.push(...deriveUnitResourceReceipts(before, after));
   }
-  return records;
+  return receipts;
 }
