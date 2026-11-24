@@ -1,0 +1,487 @@
+{
+  "version": 1,
+  "kind": "rce.native-manager-recovery/v1",
+  "owner": "red-cup-engineering/systemd-engineering-services-section",
+  "work": "https://github.com/561-group/561-group-bare-cedar-fog-services-section/issues/599",
+  "target": {
+    "host": "cold-red-gate",
+    "distribution": "Ubuntu 25.10",
+    "architecture": "amd64",
+    "manager": {
+      "authority": "user@1001.service",
+      "uid": 1001,
+      "originalPID": 1314,
+      "originalInvocation": "2e32ae1298b34543a9c63acdbf045e35",
+      "originalExecutable": "/usr/lib/systemd/systemd",
+      "originalExecutableSha256": "b1997f7c54ccece6ad4dbe213c04780e8c103e60c0b70ed62601fac29588e73c"
+    },
+    "observedUserServiceCount": 61,
+    "originalEmptyFrozenUnits": [
+      "github-pin-events.service",
+      "codex-cde-publisher-freeze-2115656.service"
+    ],
+    "affectedNativeManagers": [
+      {
+        "authority": "system",
+        "uid": 0,
+        "originalPID": 1,
+        "receiving": "Capture fresh birth/executable/maps/native authority before vendor package reexec."
+      },
+      {
+        "authority": "user@1000.service",
+        "uid": 1000,
+        "account": "linuxuser",
+        "originalPID": 1313,
+        "originalProcStartJiffies": "1925",
+        "originalInvocation": "729ea45e610249b590164f24fb663c8c",
+        "originalExecutable": "/usr/lib/systemd/systemd",
+        "originalExecutableSha256": "b1997f7c54ccece6ad4dbe213c04780e8c103e60c0b70ed62601fac29588e73c",
+        "receiving": "Original read-only identity received; require fresh unchanged identity, empty jobs and all application invocations immediately before adoption."
+      },
+      {
+        "authority": "user@1001.service",
+        "uid": 1001,
+        "account": "emsenn",
+        "originalPID": 1314,
+        "originalProcStartJiffies": "1926",
+        "originalInvocation": "2e32ae1298b34543a9c63acdbf045e35",
+        "originalExecutable": "/usr/lib/systemd/systemd",
+        "originalExecutableSha256": "b1997f7c54ccece6ad4dbe213c04780e8c103e60c0b70ed62601fac29588e73c",
+        "receiving": "Original read-only identity received; require fresh unchanged identity, empty jobs and all application invocations immediately before adoption."
+      }
+    ]
+  },
+  "selection": {
+    "sourceVersion": "257.9-0ubuntu2.5",
+    "intendedVersion": "257.9-0ubuntu2.5+rce.emptythaw2",
+    "sourceFactory": {
+      "repository": "red-cup-engineering/systemd-engineering-services-section",
+      "commit": "d9b42c614feb2339d5f5fab5c231fee08d081b31",
+      "run": 40766143508,
+      "sourceIntent": "data/records/native-manager-repair-records/emptythaw2.json",
+      "qualification": "full-vendor-and-original-native-controls-received",
+      "retainedProductRecord": "data/records/native-manager-product-records/d9b42c614feb.json",
+      "nativeConsumer": {
+        "commit": "0c9ac68e26041b48dd4f4ae98d5ea10db48f8b5c",
+        "run": 40772797684,
+        "artifactId": 12853276987,
+        "artifactBytes": 81276888,
+        "artifactSha256": "b90611f658fd8d628aa169a7ece707ea8ac6eb5db143e93ea6e684cd49386b90",
+        "nativeVerdict": "corrected-native-thaw-received",
+        "baselineVerdict": "original-defect-reproduced",
+        "populatedThawRefused": true,
+        "inactiveFreezeRefused": true,
+        "productionEffects": false
+      }
+    },
+    "packages": [
+      {
+        "package": "libnss-systemd:amd64",
+        "architecture": "amd64",
+        "predecessorVersion": "257.9-0ubuntu2.5",
+        "intendedVersion": "257.9-0ubuntu2.5+rce.emptythaw2"
+      },
+      {
+        "package": "libpam-systemd:amd64",
+        "architecture": "amd64",
+        "predecessorVersion": "257.9-0ubuntu2.5",
+        "intendedVersion": "257.9-0ubuntu2.5+rce.emptythaw2"
+      },
+      {
+        "package": "libsystemd-shared:amd64",
+        "architecture": "amd64",
+        "predecessorVersion": "257.9-0ubuntu2.5",
+        "intendedVersion": "257.9-0ubuntu2.5+rce.emptythaw2"
+      },
+      {
+        "package": "libsystemd0:amd64",
+        "architecture": "amd64",
+        "predecessorVersion": "257.9-0ubuntu2.5",
+        "intendedVersion": "257.9-0ubuntu2.5+rce.emptythaw2"
+      },
+      {
+        "package": "libudev1:amd64",
+        "architecture": "amd64",
+        "predecessorVersion": "257.9-0ubuntu2.5",
+        "intendedVersion": "257.9-0ubuntu2.5+rce.emptythaw2"
+      },
+      {
+        "package": "systemd",
+        "architecture": "amd64",
+        "predecessorVersion": "257.9-0ubuntu2.5",
+        "intendedVersion": "257.9-0ubuntu2.5+rce.emptythaw2"
+      },
+      {
+        "package": "systemd-cryptsetup",
+        "architecture": "amd64",
+        "predecessorVersion": "257.9-0ubuntu2.5",
+        "intendedVersion": "257.9-0ubuntu2.5+rce.emptythaw2"
+      },
+      {
+        "package": "systemd-resolved",
+        "architecture": "amd64",
+        "predecessorVersion": "257.9-0ubuntu2.5",
+        "intendedVersion": "257.9-0ubuntu2.5+rce.emptythaw2"
+      },
+      {
+        "package": "systemd-sysv",
+        "architecture": "amd64",
+        "predecessorVersion": "257.9-0ubuntu2.5",
+        "intendedVersion": "257.9-0ubuntu2.5+rce.emptythaw2"
+      },
+      {
+        "package": "systemd-timesyncd",
+        "architecture": "amd64",
+        "predecessorVersion": "257.9-0ubuntu2.5",
+        "intendedVersion": "257.9-0ubuntu2.5+rce.emptythaw2"
+      },
+      {
+        "package": "udev",
+        "architecture": "amd64",
+        "predecessorVersion": "257.9-0ubuntu2.5",
+        "intendedVersion": "257.9-0ubuntu2.5+rce.emptythaw2"
+      }
+    ],
+    "allowNewPackages": false,
+    "allowRemovedPackages": false,
+    "dependencyResolution": "Native APT simulation must select exactly this installed eleven-package source family, receive all strict equality dependencies, and require no network or new package.",
+    "predecessorProducts": {
+      "officialRollback": {
+        "product": "/gnu/store/04brshjwcff03izyzzw7mxj773jarpma-systemd-vendor-predecessor-257.9-0ubuntu2.5",
+        "root": "/home/emsenn/info/lib/emsenn/services/561-group/services/561-group-services-section/services/561-group-operations-services-section/services/cold-red-gate-services-section/data/state/systemd-manager-recovery-roots/vendor-systemd-257.9-0ubuntu2.5",
+        "receipt": "/home/emsenn/info/lib/emsenn/services/561-group/services/561-group-services-section/services/561-group-operations-services-section/services/cold-red-gate-services-section/data/records/native-manager-recovery-records/vendor-predecessor-Code.received.json",
+        "packages": 11,
+        "bytes": 8376598,
+        "selectedForAutomaticRollback": false
+      },
+      "rejectedCorrection": {
+        "version": "257.9-0ubuntu2.5+rce.emptythaw1",
+        "producerCommit": "d5273a55fc00d3b78c3f21d63da0bcf74b754ba5",
+        "product": "/gnu/store/jks87irdggwk29ryxg88zlbdqm9yc31l-systemd-manager-product-d5273a55fc00",
+        "root": "/home/emsenn/info/lib/emsenn/services/561-group/services/561-group-services-section/services/561-group-operations-services-section/services/cold-red-gate-services-section/data/state/systemd-manager-recovery-roots/empty-thaw-d5273a55fc00",
+        "nativeFailureConsumer": "e8bf3696780ad3a01774ef2f7dd88a42a83ff9d2",
+        "nativeFailureRun": 40764926421,
+        "nativeFailureArtifact": 12849262791,
+        "nativeQualified": false,
+        "selectionAllowed": false
+      },
+      "newCorrection": {
+        "version": "257.9-0ubuntu2.5+rce.emptythaw2",
+        "producerCommit": "d9b42c614feb2339d5f5fab5c231fee08d081b31",
+        "product": "/gnu/store/rgphpms9ba6h2r5l1mrfr4mdmccqrmqd-systemd-manager-product-d9b42c614feb",
+        "receiving": "Original d9b product manifest, every package byte and complete vendor test record received unchanged. Native consumer0c9a independently reproduced baseline, empty positive, populated negative, subsequent empty THAW/stop and inactive FREEZE refusal. No recompilation, fallback or product relabeling."
+      }
+    }
+  },
+  "productReceiving": [
+    "Require completed original vendor tests plus baseline defect and patched empty/populated native controls; no failure reclassification.",
+    "Receive exact official original eleven-package predecessor archives from authenticated native APT metadata before any installation.",
+    "Receive current CI package manifest, every selected archive hash/name/version/architecture, exact source descriptor and patch; verify finite ZIP entries, sizes and no links/traversal.",
+    "Construct and register immutable whole package and predecessor products through original native Guix add-to-store, add-temp-root and register-root Code primitives; verify the complete exact original file bill and retain native GC roots before target use.",
+    "Receive actual ELF architecture/interpreter/NEEDED symbols and --version/build features against this target closure; admit disk/inodes/memory afresh.",
+    "Receive every installed predecessor version, manager PID/birth/invocation/executable/maps, all system/user authority jobs and unchanged original startup-fence hashes immediately before install.",
+    "Receive BOTH actual active user managers UID1000 andUID1001, each original account identity/invocation/executable and job/state boundary; product admission includes vendor global user-manager reexec rather than a user1001-only claim.",
+    "Do not reuse emptythaw1 compatibility/ELF/dependency observations as receiving of emptythaw2. Receive the exact new product and redo its finite native target closure before adoption."
+  ],
+  "nativeEffect": {
+    "provider": "original Ubuntu APT/dpkg systemd package owner",
+    "operation": "Install exactly the received eleven local immutable package archives through native APT, with no-download, no extra packages and no unattended replay.",
+    "vendorPostinst": {
+      "systemManager": "daemon-reexec",
+      "userManagers": "SIGRTMIN+25 to every currently running user@*.service main process, asynchronous",
+      "serviceEffects": [
+        "try-restart systemd-networkd.service",
+        "try-restart systemd-journald.service",
+        "restart systemd-resolved.service under original maintainer-script upgrade branch",
+        "restart systemd-timesyncd.service/systemd-time-wait-sync.service under original maintainer-script upgrade branch",
+        "restart systemd-udevd.service under original maintainer-script upgrade branch",
+        "pam-auth-update --package",
+        "systemd-tmpfiles/sysusers/catalog/binfmt/sysctl declared package maintenance"
+      ],
+      "evidence": "Actual original /var/lib/dpkg/info/systemd.postinst received read-only; exact new product maintainer scripts must also be received before admission.",
+      "activeUserManagersObserved": [
+        1000,
+        1001
+      ],
+      "nativeSourceEvidence": {
+        "maintainerScripts": [
+          {
+            "kind": "preinst",
+            "package": "libnss-systemd:amd64",
+            "path": "/var/lib/dpkg/info/libnss-systemd:amd64.preinst",
+            "serviceEffects": [],
+            "sha256": "e277a9bf2f3508659341dbd58176e44723d86f72c1f05464465b3e861aadff46"
+          },
+          {
+            "kind": "postinst",
+            "package": "libnss-systemd:amd64",
+            "path": "/var/lib/dpkg/info/libnss-systemd:amd64.postinst",
+            "serviceEffects": [],
+            "sha256": "d2f7a517cb8f1bed799797927da1f5e1ad8359ce3b1a15ab95a70b4d49b86947"
+          },
+          {
+            "kind": "postrm",
+            "package": "libnss-systemd:amd64",
+            "path": "/var/lib/dpkg/info/libnss-systemd:amd64.postrm",
+            "serviceEffects": [],
+            "sha256": "49ea810693166ccbf9abce6c2ef35f9e12eab3122e4ca49b9dffad7155b957ef"
+          },
+          {
+            "kind": "postinst",
+            "package": "libpam-systemd:amd64",
+            "path": "/var/lib/dpkg/info/libpam-systemd:amd64.postinst",
+            "serviceEffects": [
+              "pam-auth-update --package"
+            ],
+            "sha256": "943223c64afa4b0047dbcf4b9f869da7ce4a852afa41407d3110cb4c3a6fcc46"
+          },
+          {
+            "kind": "prerm",
+            "package": "libpam-systemd:amd64",
+            "path": "/var/lib/dpkg/info/libpam-systemd:amd64.prerm",
+            "serviceEffects": [
+              "# pam-auth-update --remove removes the named profile from the active config.",
+              "# This may need to change later as pam-auth-update evolves.",
+              "    pam-auth-update --package --remove systemd"
+            ],
+            "sha256": "58741037b8dc450936a776d68c982a59b45dc753974534f7b6c37bb5ad98e4dc"
+          },
+          {
+            "kind": "preinst",
+            "package": "systemd",
+            "path": "/var/lib/dpkg/info/systemd.preinst",
+            "serviceEffects": [
+              "  # The user may have used 'systemctl enable /usr/share/systemd/tmp.mount', which",
+              "  # Do not use systemctl here, as libsystemd-shared might not be unpacked yet"
+            ],
+            "sha256": "6c85d4d72e10071d26f103a65a1e00b6790e8c518aa3c7d03ed0368efaab9faa"
+          },
+          {
+            "kind": "postinst",
+            "package": "systemd",
+            "path": "/var/lib/dpkg/info/systemd.postinst",
+            "serviceEffects": [
+              "_systemctl() {",
+              "        systemctl \"$@\"",
+              "    if [ \"$(_systemctl show -P LoadState systemd-binfmt.service)\" != \"masked\" ]; then",
+              "        _systemctl restart systemd-binfmt.service || true",
+              "    if [ \"$(_systemctl show -P LoadState systemd-sysctl.service)\" != \"masked\" ]; then",
+              "        _systemctl restart systemd-sysctl.service || true",
+              "_restart_managers() {",
+              "    _systemctl daemon-reexec || true",
+              "    _systemctl kill --kill-whom='main' --signal='SIGRTMIN+25' 'user@*.service' || true",
+              "    # do not restart logind",
+              "    _systemctl try-restart systemd-networkd.service || true",
+              "    _systemctl try-restart systemd-journald.service || true",
+              "                _restart_managers",
+              "    systemctl ${DPKG_ROOT:+--root=\"$DPKG_ROOT\"} enable getty@tty1.service || true",
+              "    systemctl ${DPKG_ROOT:+--root=\"$DPKG_ROOT\"} enable remote-fs.target || true",
+              "    systemctl ${DPKG_ROOT:+--root=\"$DPKG_ROOT\"} enable systemd-pstore.service || true",
+              "# skip daemon-reexec and try-restarts during shutdown to avoid hitting LP: #1803391",
+              "if [ -n \"$2\" ] && [ \"$(systemctl is-system-running)\" != \"stopping\" ]; then",
+              "    _restart_managers"
+            ],
+            "sha256": "a7a0d6570c7b70e6854306df98204f51a7215cd605c5a04a97d49bdebea7bf0a"
+          },
+          {
+            "kind": "prerm",
+            "package": "systemd",
+            "path": "/var/lib/dpkg/info/systemd.prerm",
+            "serviceEffects": [],
+            "sha256": "37d0c513f5402dcbdff4c09def2c1b8c05d3c58cda9a4b83b6426e619e2614a7"
+          },
+          {
+            "kind": "postrm",
+            "package": "systemd",
+            "path": "/var/lib/dpkg/info/systemd.postrm",
+            "serviceEffects": [],
+            "sha256": "6163119dddbeddc1781e0d41d99cb3e41796a15bdfe2a0c03a90e89e1d5ee008"
+          },
+          {
+            "kind": "postinst",
+            "package": "systemd-resolved",
+            "path": "/var/lib/dpkg/info/systemd-resolved.postinst",
+            "serviceEffects": [
+              "\t\tsystemctl --system daemon-reload >/dev/null || true",
+              "\t\t\t_dh_action=restart",
+              "\t\tdeb-systemd-invoke $_dh_action 'systemd-resolved.service' >/dev/null || true"
+            ],
+            "sha256": "10f111799537f30a19935984d540f3e9f10e04c3028ecbda6572e00566f36ead"
+          },
+          {
+            "kind": "prerm",
+            "package": "systemd-resolved",
+            "path": "/var/lib/dpkg/info/systemd-resolved.prerm",
+            "serviceEffects": [
+              "\tdeb-systemd-invoke stop 'systemd-resolved.service' >/dev/null || true"
+            ],
+            "sha256": "e730fce1b6e66cdcd197dbac9c8355a4711a2dbcff9f6ba4374fc6dda98c4e75"
+          },
+          {
+            "kind": "postrm",
+            "package": "systemd-resolved",
+            "path": "/var/lib/dpkg/info/systemd-resolved.postrm",
+            "serviceEffects": [
+              "\tsystemctl --system daemon-reload >/dev/null || true"
+            ],
+            "sha256": "2404efc6c93bbd058dfbd9bcfce3f03fa9c58d0b2f7fda5d64020bf79ad21825"
+          },
+          {
+            "kind": "postinst",
+            "package": "systemd-sysv",
+            "path": "/var/lib/dpkg/info/systemd-sysv.postinst",
+            "serviceEffects": [
+              "\t\t\tln -sf ../bin/systemctl \"$fn\""
+            ],
+            "sha256": "062974408bce7a95f468fa523bcf7f3d6360fff31ed3b581125bdc4d0f648d4a"
+          },
+          {
+            "kind": "postinst",
+            "package": "systemd-timesyncd",
+            "path": "/var/lib/dpkg/info/systemd-timesyncd.postinst",
+            "serviceEffects": [
+              "\t\tsystemctl --system daemon-reload >/dev/null || true",
+              "\t\t\t_dh_action=restart",
+              "\t\tdeb-systemd-invoke $_dh_action 'systemd-time-wait-sync.service' 'systemd-timesyncd.service' >/dev/null || true"
+            ],
+            "sha256": "2d9c92cad433f0534bcaa25db390426cd575cea64e3acb0b43778c0cf2c668e9"
+          },
+          {
+            "kind": "prerm",
+            "package": "systemd-timesyncd",
+            "path": "/var/lib/dpkg/info/systemd-timesyncd.prerm",
+            "serviceEffects": [
+              "\tdeb-systemd-invoke stop 'systemd-time-wait-sync.service' 'systemd-timesyncd.service' >/dev/null || true"
+            ],
+            "sha256": "57f7887f1c9bc6bc2d7a980b7a3e37b08e36ad901086f3c66972b5bbd6e20aa4"
+          },
+          {
+            "kind": "postrm",
+            "package": "systemd-timesyncd",
+            "path": "/var/lib/dpkg/info/systemd-timesyncd.postrm",
+            "serviceEffects": [
+              "\tsystemctl --system daemon-reload >/dev/null || true"
+            ],
+            "sha256": "ff84641dff9eaee54ad8737716a0a57a68b7093d7d339d57711e3f68764940d7"
+          },
+          {
+            "kind": "preinst",
+            "package": "udev",
+            "path": "/var/lib/dpkg/info/udev.preinst",
+            "serviceEffects": [],
+            "sha256": "c75ae3e37774bee7a4656e15a70764496460130ba2f9b994bb7db768ffaf3ae8"
+          },
+          {
+            "kind": "postinst",
+            "package": "udev",
+            "path": "/var/lib/dpkg/info/udev.postinst",
+            "serviceEffects": [
+              "\t\tsystemctl --system daemon-reload >/dev/null || true",
+              "\t\t\t_dh_action=restart",
+              "\t\tdeb-systemd-invoke $_dh_action 'systemd-udevd.service' >/dev/null || true"
+            ],
+            "sha256": "ccaf4bcb94110ae616bfecffc70f124939356a0b4955da851bc8e28932b3afb4"
+          },
+          {
+            "kind": "prerm",
+            "package": "udev",
+            "path": "/var/lib/dpkg/info/udev.prerm",
+            "serviceEffects": [
+              "\tdeb-systemd-invoke stop 'systemd-udevd.service' >/dev/null || true"
+            ],
+            "sha256": "82915f7c7c18b8b5d31032aa3065bae76534bc21144131aa65688253ce496e74"
+          },
+          {
+            "kind": "postrm",
+            "package": "udev",
+            "path": "/var/lib/dpkg/info/udev.postrm",
+            "serviceEffects": [
+              "\tsystemctl --system daemon-reload >/dev/null || true"
+            ],
+            "sha256": "b8fda4281554f60742bf8b366944cbe4888cb62e884636d07966bb4125881d74"
+          }
+        ],
+        "nativeRootServices": "MainPID=1154\nId=systemd-networkd.service\nLoadState=loaded\nActiveState=active\nSubState=running\nInvocationID=e5ee45137c1f4009b568fa8abaa6cae2\n\nMainPID=3642403\nId=systemd-journald.service\nLoadState=loaded\nActiveState=active\nSubState=running\nInvocationID=36055eb044fa4ab6a633b5dc04c98b59\n\nMainPID=573\nId=systemd-resolved.service\nLoadState=loaded\nActiveState=active\nSubState=running\nInvocationID=cc55517ef4c148fea25781318c9edef0\n\nMainPID=451\nId=systemd-timesyncd.service\nLoadState=loaded\nActiveState=active\nSubState=running\nInvocationID=ca6cc20f110b4df885f2606ce29f1faf\n\nMainPID=468\nId=systemd-udevd.service\nLoadState=loaded\nActiveState=active\nSubState=running\nInvocationID=5f72c6d3c11443a1b8fb6d7199390c8a\n",
+        "nativeUserManagers": "[{\"unit\":\"user@1000.service\",\"load\":\"loaded\",\"active\":\"active\",\"sub\":\"running\",\"description\":\"User Manager for UID 1000\"},{\"unit\":\"user@1001.service\",\"load\":\"loaded\",\"active\":\"active\",\"sub\":\"running\",\"description\":\"User Manager for UID 1001\"}]\n"
+      }
+    }
+  },
+  "operatingReceiving": [
+    "Receive native dpkg successful status and all eleven actual new selected versions; unexpected exit remains unknown, never retry automatically.",
+    "Receive every captured manager's actual /proc/PID/exe AND loaded libsystemd-core-257.so/libsystemd-shared-257.so mapping dev/inode against the exact new product hashes, stable native birth/invocation, vendor reexec completion and all original loaded startup fences. A replaced pathname or version string does not prove the old process mapped the correction.",
+    "Receive no restart of unrelated application invocations; account separately for declared networkd/journald and naturally changing transient work.",
+    "Only after independent source/product/impact review and successful manager adoption: exact original frozen-empty fixture first, then original publisher invocation ad3e76830c914033972c70efc3e081ec may THAW and stop under durable startup fences. Receive zero PIDs/cgroup/job and actual terminal unit state.",
+    "Retire only the exact owned fixture and then use canonical held single-runtime publisher receiving. Do not start old publisher or replay queued/uncertain publications."
+  ],
+  "failure": {
+    "automaticRollback": false,
+    "automaticReplay": false,
+    "predecessorProducts": "Retain exact original official archives and native target facts; rollback requires fresh native effect receiving and explicit coherent original package selection.",
+    "unknownEffects": "Retain package-manager exit/journal, original frozen units, startup fences, publication inputs and original ledger claims until actual outcome receiving."
+  },
+  "status": "native-controls-received-current-startup-fence-unreceived-no-target-operation",
+  "receivedEvidence": {
+    "nativeControls": {
+      "path": "/home/emsenn/info/lib/emsenn/services/561-group/services/561-group-services-section/services/561-group-operations-services-section/services/cold-red-gate-services-section/data/records/native-manager-recovery-records/consumer-0c9a-native-qualified/received.json",
+      "sha256": "c5a2b2b213ee20f9b90f447014ca15906b0af3a7533695aa49d1baa8f04e1331",
+      "archiveRetired": true,
+      "duplicateProductRetained": false
+    },
+    "targetPackageClosure": "/home/emsenn/info/lib/emsenn/services/561-group/services/561-group-services-section/services/561-group-operations-services-section/services/cold-red-gate-services-section/data/records/native-manager-recovery-records/target-package-closure-d9b-v2/closure.received.json",
+    "targetELFClosure": "/home/emsenn/info/lib/emsenn/services/561-group/services/561-group-services-section/services/561-group-operations-services-section/services/cold-red-gate-services-section/data/records/native-manager-recovery-records/target-elf-closure-d9b/ELF.received.json",
+    "upstreamServiceObservation": "/home/emsenn/info/lib/emsenn/services/561-group/services/561-group-services-section/services/561-group-operations-services-section/services/cold-red-gate-services-section/data/records/native-manager-recovery-records/consumer-0c9a-native-qualified-service-observation/received.json",
+    "targetBefore": {
+      "path": "/home/emsenn/info/lib/emsenn/services/561-group/services/561-group-services-section/services/561-group-operations-services-section/services/cold-red-gate-services-section/data/records/native-manager-recovery-records/target-before-qualified-0c9a/before.json",
+      "observedAt": "2026-10-28T22:43:35Z",
+      "managerPIDs": [
+        1,
+        1313,
+        1314
+      ],
+      "originalBirthsUnchanged": true,
+      "originalExecutableSha256": "b1997f7c54ccece6ad4dbe213c04780e8c103e60c0b70ed62601fac29588e73c",
+      "allElevenPredecessorVersionsUnchanged": true,
+      "originalPublisherInvocation": "ad3e76830c914033972c70efc3e081ec",
+      "publisherMainPID": 0,
+      "publisherControlPID": 0,
+      "publisherJob": "",
+      "publisherControlGroup": "",
+      "publisherFreezerState": "frozen",
+      "systemJobsEmpty": true,
+      "user1000JobsEmpty": true,
+      "user1001Jobs": [
+        {
+          "id": 12591577,
+          "unit": "561-group-credentials.service",
+          "type": "start",
+          "state": "running"
+        },
+        {
+          "id": 12591576,
+          "unit": "market-561-group-node.service",
+          "type": "start",
+          "state": "waiting"
+        }
+      ],
+      "targetMutation": false
+    },
+    "startupFenceRefusal": {
+      "path": "/home/emsenn/info/lib/emsenn/services/561-group/services/561-group-services-section/services/561-group-operations-services-section/services/cold-red-gate-services-section/data/records/native-manager-recovery-records/target-startup-fence-refusal-cfacd/received.json",
+      "observedAt": "2026-10-28T22:55:03.206Z",
+      "historical95Marker": "absent",
+      "historical96Marker": "absent",
+      "originalLagoonConditionMarker": "absent",
+      "effectiveCurrentStartupHoldReceived": false,
+      "originalTransactionPreserved": true,
+      "originalPublisherInvocation": "ad3e76830c914033972c70efc3e081ec",
+      "targetMutation": false
+    }
+  },
+  "remainingReceiving": [
+    "Complete original CDE current startup-hold generation and native receiving from computer-deployment-engine@79c3d7b89dc057ff8bb736764fa86fc33e7ad1bd existing selected-auxiliary-runtime-supplier-transition requirement. Historical95/96 and old Lagoon Unit-condition markers are absent. Do not recreate them or manufacture historical custody. Actual independent manager-effect acceptance remains conditional on a newly received current strong startup fence and all fresh target boundaries.",
+    "Independent review of the exact qualified source/product and declared eleven-package/all-manager effect family.",
+    "Fresh original all-manager jobs boundary after credentials/market operations settle; do not cancel or stop them to manufacture quiescence.",
+    "Re-read exact startup fence files and native APT simulation immediately before the declared original package operation.",
+    "Receive exact installed packages, every manager's mapped executable/core/shared identities and unchanged unrelated application invocations; only then THAW/stop the exact owned fixture and held original publisher."
+  ]
+}
